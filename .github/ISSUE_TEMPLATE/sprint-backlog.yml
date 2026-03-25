@@ -1,0 +1,35 @@
+name: 🏃 Sprint Backlog Task
+description: Define a task for the current active sprint.
+labels: ["sprint-task"]
+body:
+  - type: checkboxes
+    id: members
+    attributes:
+      label: Initially Assigned Members
+      options:
+        - label: "@username1"
+        - label: "@username2"
+        - label: "@username3"
+  - type: input
+    id: initial_estimate
+    attributes:
+      label: Initial Time Estimate
+      placeholder: (e.g., 8h)
+    validations:
+      required: true
+  - type: input
+    id: actual_time
+    attributes:
+      label: Actual Time Spent
+      placeholder: Leave blank if just starting (e.g., 2h)
+  - type: dropdown
+    id: status
+    attributes:
+      label: Sprint Status
+      options:
+        - To Do
+        - In Progress
+        - In Review
+        - Done
+    validations:
+      required: true

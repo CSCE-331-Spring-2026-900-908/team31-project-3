@@ -1,0 +1,40 @@
+name: 📋 Product Backlog Item
+description: Add a new task to the overall product backlog.
+labels: ["product-backlog"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the details below to ensure the task is properly triaged.
+  - type: input
+    id: priority
+    attributes:
+      label: Priority
+      placeholder: (e.g., High, Medium, Low, or P0-P3)
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      placeholder: List any blocking issues or external requirements.
+    validations:
+      required: true
+  - type: input
+    id: estimate
+    attributes:
+      label: Time Estimate
+      placeholder: (e.g., 5h, 3 days)
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - New
+        - Refined
+        - Blocked
+        - Ready for Sprint
+    validations:
+      required: true
