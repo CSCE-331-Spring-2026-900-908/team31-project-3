@@ -1,0 +1,19 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  background: #f6f7fb;
+  color: #111827;
+}
+
+.horizontalDiv {
+  display: flex;
+}
+
+#root {
+  min-height: 100vh;
+}
