@@ -5,7 +5,7 @@ const dbTestRouter = require("./routes/db-test");
 const employeesRouter = require("./routes/employees");
 const inventoryRouter = require("./routes/inventory");
 const productRouter = require("./routes/product");
-const productModiferRouter = require("./routes/productmodifer");
+const productModiferRouter = require("./routes/productmodifier");
 
 const app = express();
 
