@@ -12,11 +12,14 @@ const MenuBoard = () => {
   let content = categories.map(category => (
     <div>
       <h1>{category}</h1>
-      <ul>
+      <table>
         {menu.filter(product => product.category === category).map(product => (
-            <li>{product.name}, {product.price}</li>
+            <tr>
+              <td>{product.name}</td>
+              <td>{product.price}</td>
+            </tr>
         ))}
-      </ul>
+      </table>
     </div>
   ));
   return <div className="horizontalDiv">{content}</div>;

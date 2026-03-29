@@ -10,6 +10,30 @@ body {
   color: #111827;
 }
 
+div {
+  margin: 15px;
+  flex: 1;
+}
+
+h1 {
+  flex: 1;
+}
+
+table {
+  border-bottom: 1px solid;
+  flex: 1;
+  width: 500px;
+}
+
+tr {
+  flex: 1;
+}
+
+td {
+  margin: 15px;
+  flex: 1;
+}
+
 .horizontalDiv {
   display: flex;
 }
