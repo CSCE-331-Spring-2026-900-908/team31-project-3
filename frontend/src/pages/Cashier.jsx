@@ -1,3 +1,16 @@
+<<<<<<< HEAD
+import React from 'react'
+
+const Cashier = () => {
+  return (
+    <div>
+      Cashier View
+    </div>
+  )
+}
+
+export default Cashier
+=======
 import { useState, useEffect } from "react";
 import "./Cashier.css";
 
@@ -65,3 +78,4 @@ const Cashier = () => {
 };
 
 export default Cashier;
+>>>>>>> 4eaeaf3e5e184126a1efb85a0651f5b11bec6b5f
