@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import API_BASE_URL from "../config/apiBaseUrl";
 
 const PIN_LENGTH = 4;
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 const normalizeRole = (raw) => {
   if (!raw) return null;

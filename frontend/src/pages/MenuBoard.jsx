@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import "./MenuBoard.css";
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+import API_BASE_URL from "../config/apiBaseUrl";
 
 const categories = ["Milk Foam Series", "Milk Tea Series", "Creative Mix Series", "Brewed Tea Series", "Coffee Series", "Slush Series"];
 const menu = [
@@ -20,11 +19,11 @@ const MenuBoard = () => {
   const [productModifiers, setProductModifiers] = useState([]);
 
   useEffect(() => {
-    fetch(`${API}/product`)
+    fetch(`${API_BASE_URL}/product`)
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error);
-    fetch(`${API}/productmodifier`)
+    fetch(`${API_BASE_URL}/productmodifier`)
       .then((r) => r.json())
       .then((data) => setProductModifiers(Array.isArray(data) ? data : []))
       .catch(console.error);
@@ -79,7 +78,7 @@ const MenuBoard = () => {
       </table>
     </div>
   </div>;
-  return <div>{productContent}{modifierContent}</div>;
+  return <div className="menu-board">{productContent}{modifierContent}</div>;
 };
 
 export default MenuBoard;

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Cashier.css";
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+import API_BASE_URL from "../config/apiBaseUrl";
 
 const Cashier = ({ showNav = false }) => {
   const navigate = useNavigate();
@@ -10,7 +9,7 @@ const Cashier = ({ showNav = false }) => {
   const [order, setOrder] = useState([]);
 
   useEffect(() => {
-    fetch(`${API}/product`)
+    fetch(`${API_BASE_URL}/product`)
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error);

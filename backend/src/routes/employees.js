@@ -31,6 +31,41 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  const { name, role, pin_hash } = req.body || {};
+  if (!name || !role) {
+    return res.status(400).json({ error: "Name and role are required." });
+  }
+
+  try {
+    const values = [name, role];
+    let pinUpdateSql = "";
+
+    if (pin_hash) {
+      values.push(pin_hash);
+      pinUpdateSql = ", pin_hash = $3";
+    }
+
+    values.push(req.params.id);
+
+    const result = await pool.query(
+      `UPDATE employee
+       SET name = $1, role = $2${pinUpdateSql}
+       WHERE id = $${values.length}
+       RETURNING *`,
+      values
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Employee not found." });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const result = await pool.query(

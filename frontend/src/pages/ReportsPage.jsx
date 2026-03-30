@@ -13,8 +13,8 @@ import {
   TableRow,
 } from "@mui/material";
 import "./Manager.css";
+import API_BASE_URL from "../config/apiBaseUrl";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 const DATE_RANGES = ["1 Week", "1 Month", "1 Year"];
 const VIEW_MODES = ["Dashboard", "Table Only", "Chart Only"];
 const MANAGER_TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
@@ -146,7 +146,8 @@ const ReportsPage = () => {
 
   const handleManagerTabClick = (tab) => {
     if (tab === "Reports") return;
-    navigate("/manager");
+    const params = new URLSearchParams({ tab });
+    navigate(`/manager?${params.toString()}`);
   };
 
   return (
