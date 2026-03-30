@@ -1,0 +1,119 @@
+.manager-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.manager-navbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 24px;
+  background: #374151;
+  align-items: center;
+  border-radius: 12px;
+}
+
+.manager-nav-btn {
+  padding: 6px 14px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.manager-signout-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: none;
+  border: 1px solid #6b7280;
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.manager-nav-btn.active {
+  background: #4b5563;
+  color: #f3f4f6;
+  font-weight: 600;
+}
+
+.manager-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+.manager-section {
+  padding: 24px;
+}
+
+.manager-section h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.manager-menu-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.manager-input {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.manager-add-btn {
+  padding: 8px 16px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.manager-remove-btn {
+  padding: 4px 10px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.manager-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.manager-table th {
+  text-align: left;
+  padding: 10px 16px;
+  background: #f6f7fb;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.manager-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.95rem;
+}
