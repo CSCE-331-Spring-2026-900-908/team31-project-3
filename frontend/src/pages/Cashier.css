@@ -1,0 +1,103 @@
+.cashier-layout {
+  display: flex;
+  height: 100%;
+  padding: 24px;
+  gap: 24px;
+  box-sizing: border-box;
+  min-width: 872px;
+  overflow-x: auto;
+}
+
+.cashier-menu {
+  flex: 1;
+  min-width: 500px;
+  overflow-y: auto;
+}
+
+.cashier-heading {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.cashier-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.cashier-product-btn {
+  padding: 16px 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.cashier-sidebar {
+  flex: 0 0 300px;
+  align-self: stretch;
+  background: #fff;
+  border: 1.5px solid #111827;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.cashier-order-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cashier-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f6f7fb;
+  border-radius: 8px;
+}
+
+.cashier-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.cashier-pinned {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.cashier-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cashier-submit-btn {
+  padding: 12px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
