@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 const views = [
   { label: "Menu Board", path: "/menu-board", desc: "Non-interactive display" },
   { label: "Customer", path: "/customer", desc: "Self-service kiosk" },
-  { label: "Cashier", path: "/cashier", desc: "Point-of-sale system" },
-  { label: "Manager", path: "/manager", desc: "Point-of-sale system" },
+  { label: "Cashier", path: "/login?role=cashier", desc: "Point-of-sale system" },
+  { label: "Manager", path: "/login?role=manager", desc: "Point-of-sale system" },
 ];
 
 const Portal = () => (

@@ -1,3 +1,109 @@
 .app {
   padding: 24px;
 }
+
+.page {
+  min-height: 100vh;
+}
+
+.login-page {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.pin-card {
+  width: min(360px, 92vw);
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.08);
+  padding: 24px;
+}
+
+.pin-title {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.pin-subtitle {
+  margin: 6px 0 18px;
+  color: #6b7280;
+}
+
+.pin-dots {
+  display: inline-flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  width: 100%;
+}
+
+.pin-dot {
+  display: block;
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #9ca3af;
+  background: transparent;
+}
+
+.pin-dot.filled {
+  background: #111827;
+  border-color: #111827;
+}
+
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pin-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  background: #f3f4f6;
+}
+
+.pin-btn.alt {
+  font-size: 0.9rem;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 14px;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  background: #2563eb;
+  cursor: pointer;
+}
+
+.submit-btn:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.pin-error {
+  margin-top: 10px;
+  margin-bottom: 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
