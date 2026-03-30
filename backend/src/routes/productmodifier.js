@@ -1,12 +1,12 @@
-// backend/src/routes/inventory.js
+// backend/src/routes/productmodifier.js
 const express = require("express");
-const pool = require("../../server/db");
+const db = require("../../server/db");
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM productmodifier LIMIT 100");
+    const result = await db.query("SELECT * FROM modifieroption LIMIT 100");
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
