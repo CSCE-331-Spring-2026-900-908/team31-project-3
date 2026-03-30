@@ -4,12 +4,17 @@
   font-weight: 400;
 }
 
-body {
+html, body {
   margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
   background: #f6f7fb;
   color: #111827;
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
 }
