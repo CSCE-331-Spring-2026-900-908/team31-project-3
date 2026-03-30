@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Cashier from "./Cashier";
 import "./Manager.css";
 
@@ -7,6 +8,7 @@ const TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
 
 const Manager = () => {
   const [tab, setTab] = useState("Orders");
+  const navigate = useNavigate();
 
   return (
     <div className="manager-layout">
@@ -15,12 +17,20 @@ const Manager = () => {
           <button
             key={t}
             className={`manager-nav-btn${tab === t ? " active" : ""}`}
-            onClick={() => setTab(t)}
+            onClick={() => {
+              if (t === "Reports") {
+                navigate("/reports");
+                return;
+              }
+              setTab(t);
+            }}
           >
             {t}
           </button>
         ))}
-        <button className="manager-signout-btn">Sign Out</button>
+        <button className="manager-signout-btn" onClick={() => navigate("/")}>
+          Sign Out
+        </button>
       </nav>
 
       {tab === "Orders" ? (
