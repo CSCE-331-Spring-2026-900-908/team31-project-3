@@ -1,12 +1,16 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
 import "./index.css";
-import InventoryWeb from "./InventoryWeb.jsx";
+import InventoryWeb from "./pages/InventoryWeb.jsx";
 
 const root = createRoot(document.getElementById("root"));
 
 root.render(
   <React.StrictMode>
-    <InventoryWeb/>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );

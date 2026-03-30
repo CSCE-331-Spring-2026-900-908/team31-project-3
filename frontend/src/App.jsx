@@ -1,23 +1,18 @@
-import React from "react";
-import "./App.css";
-import Message from "./InventorySearchbar";
+import { Routes, Route } from "react-router-dom";
+import Portal from "./pages/Portal";
+import MenuBoard from "./pages/MenuBoard";
+import Customer from "./pages/Customer";
+import Cashier from "./pages/Cashier";
+import Manager from "./pages/Manager";
 
-
-const App = () => {
-  const allitems = ['New York', 'San Francisco', 'Paris', 'London']
-
-  const handleSelectItem = (item) => {
-    console.log(item);
-  }
-  return (
-    <div>
-      <Message
-        items={allitems}
-        heading="helloHeading" 
-        onSelect={handleSelectItem}
-      />
-    </div>
-    )
-};
+const App = () => (
+  <Routes>
+    <Route path="/" element={<Portal />} />
+    <Route path="/menu-board" element={<MenuBoard />} />
+    <Route path="/customer" element={<Customer />} />
+    <Route path="/cashier" element={<Cashier showNav />} />
+    <Route path="/manager" element={<Manager />} />
+  </Routes>
+);
 
 export default App;
