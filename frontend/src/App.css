@@ -109,9 +109,14 @@
 
 .reports-page {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 260px minmax(0, 1fr);
   gap: 16px;
   padding: 20px;
+  margin: 0;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
   background: #f6f7fb;
   box-sizing: border-box;
   height: 100%;
@@ -124,7 +129,7 @@
   color: #111827;
   padding: 16px;
   border-radius: 14px;
-  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.08);
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -171,12 +176,13 @@
 .reports-main {
   background: #fff;
   border-radius: 14px;
-  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.08);
+  box-shadow: none;
   padding: 16px 18px;
   width: 100%;
   box-sizing: border-box;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-gutter: stable;
 }
 
@@ -186,7 +192,10 @@
   justify-content: flex-start;
   align-items: center;
   gap: 18px;
-  margin-bottom: 14px;
+  margin-top: 0px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
   width: 100%;
 }
 
@@ -344,9 +353,15 @@
 
 .table-card {
   border-radius: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  margin-left: 0;
+  margin-right: 0;
   background: #fff;
   border: 1px solid #e5e7eb;
-  padding: 8px;
+  padding: 0;
   overflow: visible;
 }
 

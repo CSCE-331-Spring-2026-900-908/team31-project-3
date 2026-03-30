@@ -121,7 +121,8 @@ const ReportsPage = () => {
       })),
     [chartData]
   );
-  const chartHeight = Math.max(220, chartRows.length * 32 + 120);
+  const cardContentHeight = Math.max(220, chartRows.length * 32 + 80);
+  const cardHeight = cardContentHeight + 16;
   const tableColumns = useMemo(
     () =>
       (reportData.columns || []).map((column) => ({
@@ -243,12 +244,11 @@ const ReportsPage = () => {
                     series={[
                       {
                         dataKey: "value",
-                        label: activeReport,
                       },
                     ]}
                     layout="horizontal"
-                    height={chartHeight}
-                    margin={{ top: 8, right: 16, bottom: 24, left: 0 }}
+                    height={cardContentHeight}
+                    margin={{ top: 0, right: 16, bottom: 5, left: 0 }}
                     grid={{ vertical: true }}
                     borderRadius={8}
                   />
@@ -259,70 +259,76 @@ const ReportsPage = () => {
             ) : null}
 
             {activeViewMode !== "Chart Only" ? (
-              <section className="table-card">
-                <Paper
-                  elevation={0}
+              <Paper
+                className="table-card"
+                elevation={0}
+                sx={{
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  maxHeight: cardHeight,
+                  padding: 0,
+                  marginLeft: 0,
+                  marginRight: 0,
+                  borderRadius: "10px",
+                }}
+              >
+                <TableContainer
                   sx={{
-                    borderRadius: "10px",
-                    border: "1px solid #e5e7eb",
-                    overflow: "hidden",
-                    backgroundColor: "#fff",
-                    display: "flex",
-                    flexDirection: "column",
-                    maxHeight: 440,
+                    minHeight: 0,
+                    overflowX: "auto",
+                    overflowY: "auto",
+                    maxHeight: cardHeight,
                   }}
                 >
-                  <TableContainer
+                  <Table
+                    stickyHeader
+                    size="small"
                     sx={{
-                      flex: 1,
-                      minHeight: 0,
-                      overflow: "auto",
+                      minWidth: "max-content",
                     }}
                   >
-                    <Table stickyHeader size="small">
-                      <TableHead>
-                        <TableRow>
+                    <TableHead>
+                      <TableRow>
+                        {(reportData.columns || []).map((column) => (
+                          <TableCell
+                            key={column}
+                            sx={{
+                              backgroundColor: "#f8fafc",
+                              borderBottom: "1px solid #e5e7eb",
+                              fontWeight: 700,
+                              color: "#6b7280",
+                              minWidth: 70,
+                            }}
+                          >
+                            {column}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                      {pagedRows.map((row, rowIndex) => (
+                        <TableRow key={`${activeReport}-${page}-${rowIndex}`}>
                           {(reportData.columns || []).map((column) => (
                             <TableCell
-                              key={column}
+                              key={`${column}-${rowIndex}`}
                               sx={{
-                                backgroundColor: "#f8fafc",
-                                borderBottom: "1px solid #e5e7eb",
-                                fontWeight: 700,
-                                color: "#6b7280",
-                                minWidth: 140,
+                                borderBottom: "1px solid #f3f4f6",
+                                fontSize: "0.95rem",
+                                color: "#111827",
                               }}
+                              size="small"
                             >
-                              {column}
+                              {String(row?.[column] ?? "")}
                             </TableCell>
                           ))}
                         </TableRow>
-                      </TableHead>
-
-                      <TableBody>
-                        {pagedRows.map((row, rowIndex) => (
-                          <TableRow key={`${activeReport}-${page}-${rowIndex}`}>
-                            {(reportData.columns || []).map((column) => (
-                              <TableCell
-                                key={`${column}-${rowIndex}`}
-                                sx={{
-                                  borderBottom: "1px solid #f3f4f6",
-                                  fontSize: "0.95rem",
-                                  color: "#111827",
-                                }}
-                                size="small"
-                              >
-                                {String(row?.[column] ?? "")}
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
-                </Paper>
-              </section>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
             ) : null}
           </main>
         </div>
