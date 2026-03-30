@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Cashier from "./Cashier";
 import "./Manager.css";
-import InventoryWeb from "./InventoryWeb";
 
 
 const TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
@@ -30,7 +29,7 @@ const Manager = () => {
         <div className="manager-content">
           {tab === "Menu"      && <Section title="Menu Items" />}
           {tab === "Employees"     && <Section title="Employees" />}
-          {tab === "Inventory" && <InventoryWeb/>}
+          {tab === "Inventory" && <Section title="Inventory" />}
           {tab === "Reports"   && <Section title="Reports" />}
         </div>
       )}
