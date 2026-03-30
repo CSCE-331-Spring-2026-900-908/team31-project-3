@@ -1,22 +1,9 @@
-<<<<<<< HEAD
-import React from 'react'
-
-const Cashier = () => {
-  return (
-    <div>
-      Cashier View
-    </div>
-  )
-}
-
-export default Cashier
-=======
 import { useState, useEffect } from "react";
 import "./Cashier.css";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
-const Cashier = () => {
+const Cashier = ({ showNav = false }) => {
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
 
@@ -39,12 +26,50 @@ const Cashier = () => {
 
   const total = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
 
-  return (
+  return showNav ? (
+    <div className="cashier-page">
+      <nav className="cashier-navbar">
+        <button className="cashier-signout-btn">Sign Out</button>
+      </nav>
+      <div className="cashier-layout">
+        <div className="cashier-menu">
+          <h2 className="cashier-heading">Menu</h2>
+          <div className="cashier-product-grid">
+            {products.map((p) => (
+              <button key={p.product_id} className="cashier-product-btn" onClick={() => addItem(p)}>
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="cashier-sidebar">
+          <h2 className="cashier-heading">Current Order</h2>
+          <div className="cashier-order-list">
+            {order.map((item) => (
+              <div key={item.product_id} className="cashier-order-item">
+                <span>{item.name}</span>
+                <button className="cashier-remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
+              </div>
+            ))}
+          </div>
+          <div className="cashier-pinned">
+            <div className="cashier-total-row">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+            <button className="cashier-submit-btn" disabled={order.length === 0} onClick={() => { alert("Order submitted!"); setOrder([]); }}>
+              Submit Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
     <div className="cashier-layout">
       <div className="cashier-menu">
         <h2 className="cashier-heading">Menu</h2>
         <div className="cashier-product-grid">
-          {/* TODO: populate menu items from backend */}
           {products.map((p) => (
             <button key={p.product_id} className="cashier-product-btn" onClick={() => addItem(p)}>
               {p.name}
@@ -78,4 +103,3 @@ const Cashier = () => {
 };
 
 export default Cashier;
->>>>>>> 4eaeaf3e5e184126a1efb85a0651f5b11bec6b5f
