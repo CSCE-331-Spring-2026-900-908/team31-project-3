@@ -1,0 +1,25 @@
+.inventory-grid {
+    display: grid;
+
+    grid-template-columns:
+        80px   /* id */
+        220px  /* name */
+        120px  /* quantity */
+        120px  /* unit */
+        200px  /* expiration */
+        120px; /* target */
+
+    border: 2px solid black;
+    margin-top: 20px;
+}
+
+.inventory-grid div {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.header {
+    font-weight: bold;
+    background-color: #f5f5f5;
+    border-bottom: 2px solid black;
+}
