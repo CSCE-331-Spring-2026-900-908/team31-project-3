@@ -11,8 +11,8 @@ const Chatbot = () => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState();
-    const [userInput, setUserInput] = useState();
-    const [aiOutput, setaiOutput] = useState();
+    const [userInput, setUserInput] = useState("");
+    const [aiOutput, setaiOutput] = useState("");
 
     const abortControllerRef = useRef(null);
 
@@ -51,8 +51,8 @@ const Chatbot = () => {
         return <div>iError in the database</div>
     }
     
-    function handleSend(){
-        aiOutput = sendGemniMessage(userInput);
+    async function handleSend(){
+        setaiOutput(await sendGemniMessage(userInput));
         setUserInput("");
     }
 

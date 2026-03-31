@@ -8,6 +8,8 @@ const productRouter = require("./routes/product");
 const productModiferRouter = require("./routes/productmodifier");
 const authRouter = require("./routes/auth");
 const reportsRouter = require("./routes/reports");
+const gemniaiRouter = require("./gemniai/reports");
+
 
 const app = express();
 
@@ -21,6 +23,7 @@ app.use("/product", productRouter);
 app.use("/productmodifier", productModiferRouter);
 app.use("/auth", authRouter);
 app.use("/reports", reportsRouter);
+app.use("/gemniaiRouter",airouter)
 
 app.get("/", (req, res) => {
   res.json({ status: "ok" });
