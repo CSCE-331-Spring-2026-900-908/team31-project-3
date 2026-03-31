@@ -10,6 +10,7 @@ const Chatbot = () => {
     const [posts, setPosts] = useState([]);
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState();
+    const [userInput, setUserInput] = useState();
 
     const abortControllerRef = useRef(null);
 
@@ -47,13 +48,34 @@ const Chatbot = () => {
     if(error){
         return <div>iError in the database</div>
     }
- 
+    
+    function handleSend(){
+        setUserInput("");
+    }
+
+    function handleEnter(e){
+        if(e.key === "Enter"){
+            handleSend();
+        }
+        
+    }
+
+
   return (
     <div className="Chatbot-Wrapper">
       <h1>Hello</h1>
+      <h1> YES {userInput} </h1>
         <div>
-            <input placehodler = "Hello there"></input>
+            <input 
+            placehodler = "Hello there"
+            type = 'text'
+            value = {userInput}
+            onChange ={(e) => setUserInput(e.target.value)}
+            onKeyDown={handleEnter}
+            ></input>
+            <button onClick = {handleSend} >Submit</button>
         </div>
+        
         <ul>
             {posts.map((post) => {
                 return <li key ={post.id}>{post.title}</li>
