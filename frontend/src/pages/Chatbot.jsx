@@ -1,5 +1,6 @@
 import './Chatbot.css';
 import {useEffect, useState, useRef } from 'react';
+import { sendGemniMessage } from './ChatbotGemni';
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
@@ -11,6 +12,7 @@ const Chatbot = () => {
     const [isLoading, setLoading] = useState(false);
     const [error, setError] = useState();
     const [userInput, setUserInput] = useState();
+    const [aiOutput, setaiOutput] = useState();
 
     const abortControllerRef = useRef(null);
 
@@ -50,6 +52,7 @@ const Chatbot = () => {
     }
     
     function handleSend(){
+        aiOutput = sendGemniMessage(userInput);
         setUserInput("");
     }
 
@@ -57,7 +60,6 @@ const Chatbot = () => {
         if(e.key === "Enter"){
             handleSend();
         }
-        
     }
 
 
@@ -75,7 +77,7 @@ const Chatbot = () => {
             ></input>
             <button onClick = {handleSend} >Submit</button>
         </div>
-        
+        <h1>Response Ai: {aiOutput}</h1>
         <ul>
             {posts.map((post) => {
                 return <li key ={post.id}>{post.title}</li>
