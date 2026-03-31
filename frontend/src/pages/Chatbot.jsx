@@ -1,5 +1,6 @@
 import './Chatbot.css';
 
+// chat bot function
 const Chatbot = () => {
   return (
     
