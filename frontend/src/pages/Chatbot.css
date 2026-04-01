@@ -1,5 +1,34 @@
+.root-of-chatbot{
+    border: 1px solid black;
+  
+}
 .Chatbot-Wrapper{
-    position:absolute;
-    top: 95%;
-    left: 95%;
+    
+    border: 1px solid black;
+    overflow: scroll;    
+    border-radius: 10px;
+    position:fixed;
+    top: 50%;
+    left: 60%;
+    height: 40%;
+    width: 40%;
+}  
+
+.masscot-icon{
+    border: 1px solid firebrick;
+    top: 80%;
+    left: 90%;
+    position:fixed;
+   
+}
+.masscot-icon img{
+    width: 100%;
+    height:100%; 
+    z-index: 3;
+    
+}
+
+.masscot-icon button{
+    width: 100%;
+    height:100%; 
 }
