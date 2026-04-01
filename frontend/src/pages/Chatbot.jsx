@@ -52,7 +52,9 @@ const Chatbot = () => {
     }
     
     async function handleSend(){
-        setaiOutput(await sendGemniMessage(userInput));
+        const reply = await sendGemniMessage(userInput);
+        setaiOutput(reply);
+        console.log(aiOutput);
         setUserInput("");
     }
 
