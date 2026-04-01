@@ -6,6 +6,7 @@ const employeesRouter = require("./routes/employees");
 const inventoryRouter = require("./routes/inventory");
 const productRouter = require("./routes/product");
 const productModiferRouter = require("./routes/productmodifier");
+const ordersRouter = require("./routes/orders");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use("/employees", employeesRouter);
 app.use("/inventory", inventoryRouter);
 app.use("/product", productRouter);
 app.use("/productmodifier", productModiferRouter);
+app.use("/orders", ordersRouter);
 
 app.get("/", (req, res) => {
   res.json({ status: "ok" });
