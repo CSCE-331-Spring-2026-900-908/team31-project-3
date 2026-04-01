@@ -6,6 +6,7 @@ import Cashier from "./pages/Cashier";
 import Manager from "./pages/Manager";
 import LoginPage from "./pages/LoginPage";
 import ReportsPage from "./pages/ReportsPage";
+import EmployeesPage from "./pages/EmployeesPage";
 import "./App.css";
 
 const App = () => (
@@ -13,6 +14,7 @@ const App = () => (
     <Route path="/" element={<Portal />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/reports" element={<ReportsPage />} />
+    <Route path="/employees" element={<EmployeesPage />} />
     <Route path="/menu-board" element={<MenuBoard />} />
     <Route path="/customer" element={<Customer />} />
     <Route path="/cashier" element={<Cashier showNav />} />
