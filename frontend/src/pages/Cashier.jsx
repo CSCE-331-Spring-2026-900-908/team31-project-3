@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Cashier.css";
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+import API_BASE_URL from "../config/apiBaseUrl";
 
 const Cashier = ({ showNav = false }) => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
 
   useEffect(() => {
-    fetch(`${API}/product`)
+    fetch(`${API_BASE_URL}/product`)
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error);
@@ -23,13 +24,14 @@ const Cashier = ({ showNav = false }) => {
   };
 
   const removeItem = (id) => setOrder((prev) => prev.filter((i) => i.product_id !== id));
+  const handleSignOut = () => navigate("/");
 
   const total = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
 
   return showNav ? (
     <div className="cashier-page">
       <nav className="cashier-navbar">
-        <button className="cashier-signout-btn">Sign Out</button>
+        <button className="cashier-signout-btn" onClick={handleSignOut}>Sign Out</button>
       </nav>
       <div className="cashier-layout">
         <div className="cashier-menu">
