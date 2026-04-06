@@ -16,11 +16,31 @@ const gemniAiRouter = require("./routes/gemniAi");
 
 const app = express();
 
-const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://team31-project3.vercel.app",
+]);
+
+if (process.env.CLIENT_URL) {
+  allowedOrigins.add(process.env.CLIENT_URL);
+}
+
+if (process.env.ALLOWED_ORIGINS) {
+  process.env.ALLOWED_ORIGINS.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .forEach((origin) => allowedOrigins.add(origin));
+}
 
 app.use(
   cors({
-    origin: clientOrigin,
+    origin: (origin, callback) => {
+      // Allow same-origin/server-side requests without an Origin header.
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) return callback(null, true);
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
   })
 );
