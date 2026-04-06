@@ -6,6 +6,7 @@ const TAB_ROUTES = {
   Orders: "/orders",
   Menu: "/menu",
   Employees: "/employees",
+  Inventory: "/inventory",
   Reports: "/reports",
 };
 

@@ -9,6 +9,7 @@ import ReportsPage from "./pages/ReportsPage";
 import EmployeesPage from "./pages/EmployeesPage";
 import MenuEditPage from "./pages/MenuEditPage";
 import OrdersPage from "./pages/OrdersPage";
+import InventoryPage from "./pages/InventoryPage";
 import "./App.css";
 
 const App = () => (
@@ -19,6 +20,7 @@ const App = () => (
     <Route path="/employees" element={<EmployeesPage />} />
         <Route path="/menu" element={<MenuEditPage />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
     <Route path="/menu-board" element={<MenuBoard />} />
     <Route path="/customer" element={<Customer />} />
     <Route path="/cashier" element={<Cashier showNav />} />
