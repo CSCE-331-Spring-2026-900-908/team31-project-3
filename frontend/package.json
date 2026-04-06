@@ -15,7 +15,7 @@
     "@google/genai": "^1.47.0",
     "@google/generative-ai": "^0.24.1",
     "@mui/material": "^7.3.9",
-    "@mui/x-charts": "^8.28.0",
+    "@mui/x-charts": "^8.28.2",
     "@mui/x-data-grid": "^8.28.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

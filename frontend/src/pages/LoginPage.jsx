@@ -190,9 +190,6 @@ const LoginPage = () => {
         </button>
 
         {error ? <p className="pin-error">{error}</p> : null}
-        <Link to="/" className="back-link">
-          Back to Portal
-        </Link>
       </div>
     </div>
   );
