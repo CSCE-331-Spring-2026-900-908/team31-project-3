@@ -282,6 +282,30 @@
   justify-content: flex-end;
 }
 
+.menu-col-name {
+  width: 35%;
+}
+
+.menu-col-category {
+  width: 20%;
+}
+
+.menu-col-price {
+  width: 12%;
+}
+
+.menu-col-active {
+  width: 8%;
+}
+
+.menu-col-actions {
+  width: 25%;
+}
+
+.menu-price-input {
+  width: 90px;
+}
+
 @media (max-width: 980px) {
   .employees-col-actions {
     width: 40%;
