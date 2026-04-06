@@ -107,7 +107,16 @@
   width: 115px;
   height: 115px;
   border-radius: 12px;
-  background: #f3f4f6;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
+.orders-product-img {
+  width: 115px;
+  height: 115px;
+  border-radius: 12px;
+  object-fit: contain;
+  object-position: center;
   flex-shrink: 0;
 }
 

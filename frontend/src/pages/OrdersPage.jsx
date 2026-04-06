@@ -98,7 +98,17 @@ const OrdersPage = ({ cashierMode = false }) => {
                     className="orders-product-btn"
                     onClick={() => addItem(p)}
                   >
-                    <div className="orders-product-img-placeholder" />
+                    <div className="orders-product-img-placeholder" >
+                      {p.image_url ? (
+                        <img
+                          src={p.image_url}
+                          alt={p.name}
+                          className="orders-product-img"
+                        />
+                      ) : (<div className="orders-product-no-img">No Image</div>
+                      )}
+
+                    </div>
                     <span className="orders-product-name">{p.name}</span>
                     <span className="orders-product-price">
                       ${Number(p.base_price).toFixed(2)}
