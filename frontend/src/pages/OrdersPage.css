@@ -1,0 +1,255 @@
+.orders-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.orders-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+  gap: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ── Menu panel ── */
+
+.orders-menu {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ── Category filter ── */
+
+.orders-menu .manager-section-heading {
+  margin-bottom: 0;
+}
+
+.orders-category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: -20px;
+  margin-bottom: 0;
+}
+
+.orders-filter-btn {
+  padding: 4px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #374151;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.orders-filter-btn.active {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+/* ── Category sections ── */
+
+.orders-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orders-category-heading {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* ── Product grid & cards ── */
+
+.orders-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+.orders-product-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: inherit;
+  text-align: center;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.orders-product-btn:hover {
+  border-color: #9ca3af;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.orders-product-img-placeholder {
+  width: 115px;
+  height: 115px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+
+.orders-product-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.orders-product-price {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.orders-menu::-webkit-scrollbar {
+  display: none;
+}
+
+.orders-menu {
+  scrollbar-width: none;
+}
+
+/* ── Order sidebar ── */
+
+.orders-sidebar {
+  flex: 0 0 300px;
+  align-self: stretch;
+  background: #fff;
+  border: 1.5px solid #111827;
+  border-radius: 12px;
+  padding: 24px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 0;
+}
+
+.orders-sidebar-heading {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.orders-order-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.orders-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f6f7fb;
+  border-radius: 8px;
+  gap: 8px;
+}
+
+.orders-order-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.orders-order-item-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orders-order-item-qty {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.orders-order-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.orders-order-item-price {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.orders-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+}
+
+.orders-empty {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.orders-pinned {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.orders-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.orders-submit-btn {
+  padding: 12px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.orders-submit-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
