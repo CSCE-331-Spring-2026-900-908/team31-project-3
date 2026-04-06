@@ -1,5 +1,7 @@
+import API_BASE_URL from "../config/apiBaseUrl";
+
 export async function sendGemniMessage(message){
-    const response = await fetch("http://localhost:3001/gemniAi/chat", {
+    const response = await fetch(`${API_BASE_URL}/gemniAi/chat`, {
         method: "POST",
         headers:{
             "Content-Type": "application/json",
@@ -19,7 +21,7 @@ export async function sendGemniMessage(message){
 
  }
 // export async function sendGemniMessage(message) {
-//     const response = await fetch("http://localhost:3001/gemniAi/chat", {
+//     const response = await fetch(`${API_BASE_URL}/gemniAi/chat`, {
 //         method: "POST",
 //         headers: {
 //             "Content-Type": "application/json",
