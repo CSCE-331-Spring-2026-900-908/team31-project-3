@@ -1,6 +1,6 @@
 :root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.5;
+  line-height: 1.4;
   font-weight: 400;
 }
 
@@ -8,47 +8,118 @@ body {
   margin: 0;
   background: #f6f7fb;
   color: #111827;
+  overflow: hidden; /* Prevent scrolling, force fit */
 }
 
-.menu-board div {
-  margin: 15px;
+.menu-board-fullscreen {
+  height: 100vh;
+  width: 100vw;
+  padding: 2vw;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Force fit to a single screen */
 }
 
-.menu-board h1 {
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #000000;
+  margin-bottom: 2vh;
+  padding-bottom: 1vh;
+  flex-shrink: 0;
+}
+
+.menu-title {
+  margin: 0 !important;
+  font-size: 3vw;
+  color: #000000;
+  font-weight: 700;
+}
+
+.menu-clock {
+  font-size: 2.5vw;
+  font-weight: bold;
+  color: #555;
+  padding-right: 1vw;
+}
+
+.menu-masonry {
+  flex: 1;
+  /* Use CSS columns to organically flow categories */
+  column-count: 4;
+  column-gap: 3vw;
+  width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .menu-masonry {
+    column-count: 3;
+  }
+}
+@media (max-width: 800px) {
+  .menu-masonry {
+    column-count: 2;
+  }
+}
+
+.menu-column {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 2vh;
+  background: white;
+  padding: 1.5vw;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.toppings-column {
+  background: #fff8f8; /* highlight toppings */
+}
+
+.menu-column h2 {
+  border-bottom: 2px solid #000000;
+  padding-bottom: 0.5vh;
+  margin-bottom: 1.5vh;
+  color: #333;
+  font-size: 1.8vw;
+  margin-top: 0;
+}
+
+.menu-column table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.menu-column tbody {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
-.menu-board table {
-  border-bottom: 1px solid;
+.menu-column tr {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  padding: 0.5vh 0;
+  border-bottom: 1px dashed #eee;
 }
-
-.menu-board tr {
-  display: flex;
-  flex-direction: row;
-}
-
-.menu-board td {
-  margin-bottom: 15px;
+.menu-column tr:last-child {
+  border-bottom: none;
 }
 
 .label {
-  width: 90%;
+  text-align: left;
+  font-weight: 600;
+  font-size: 1.25vw;
+  color: #333;
+  padding-right: 1vw;
 }
 
 .price {
-  width: 10%;
-}
-
-.horizontalDiv {
-  display: flex;
-  flex-direction: row;
-}
-
-#root {
-  min-height: 100vh;
+  text-align: right;
+  color: #555;
+  font-weight: bold;
+  font-size: 1.25vw;
+  white-space: nowrap;
 }
