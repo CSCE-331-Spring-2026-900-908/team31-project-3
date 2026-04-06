@@ -9,6 +9,7 @@ import EmployeesPage from "./pages/EmployeesPage";
 import MenuEditPage from "./pages/MenuEditPage";
 import OrdersPage from "./pages/OrdersPage";
 import InventoryPage from "./pages/InventoryPage";
+import Kiosk from "./pages/Kiosk";
 import "./App.css";
 
 const App = () => (

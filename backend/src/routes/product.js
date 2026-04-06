@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT product_id, name, base_price, category_name, is_active FROM product ORDER BY name LIMIT 200"
+      "SELECT product_id, name, base_price, category_name, is_active, image_url FROM product ORDER BY name LIMIT 200"
     );
     res.json(result.rows);
   } catch (err) {

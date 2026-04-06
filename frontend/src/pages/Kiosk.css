@@ -1,0 +1,156 @@
+.kiosk-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.kiosk-navbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 24px;
+  background: #374151;
+  align-items: center;
+  border-radius: 12px;
+  margin: 0;
+}
+
+
+.kiosk-signout-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: none;
+  border: 1px solid #6b7280;
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.kiosk-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+  gap: 24px;
+  box-sizing: border-box;
+  min-width: 872px;
+  overflow-x: auto;
+}
+
+.kiosk-menu {
+  flex: 1;
+  min-width: 500px;
+  overflow-y: auto;
+}
+
+.kiosk-heading {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.kiosk-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.kiosk-product-btn {
+  padding: 16px 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.kiosk-category-btn {
+  padding: 16px 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: inherit;
+}
+
+.kiosk-sidebar {
+  flex: 0 0 300px;
+  align-self: stretch;
+  background: #fff;
+  border: 1.5px solid #111827;
+  border-radius: 12px;
+  padding: 24px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 0;
+}
+
+.kiosk-topbar {
+  flex: 0 0 100px;
+  align-self: stretch;
+  background: #fff;
+  border: 1.5px solid #111827;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  /* grid-template-columns: auto auto auto; */
+  /* grid-template-rows: auto auto auto; */
+  min-height: 0;
+}
+
+.kiosk-order-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.kiosk-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f6f7fb;
+  border-radius: 8px;
+}
+
+.kiosk-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.kiosk-pinned {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.kiosk-total-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.kiosk-submit-btn {
+  padding: 12px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
