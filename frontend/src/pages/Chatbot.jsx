@@ -5,7 +5,8 @@ import bobamascot from "../assets/bobamascot.png";
 import sendIcon from "../assets/sendIcon.png";
 import cancelIcon from "../assets/cancelIcon.png";
 
-const BASE_URL = 'https://jsonplaceholder.typicode.com';
+//Things to add: Add previous messages to chat bot, make the top look better, maybe add the weather and date and time to the chat bot message. 
+//Add a function to this file called get weather 
 
 
 // chat bot function
