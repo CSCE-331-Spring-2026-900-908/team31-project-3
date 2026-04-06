@@ -17,12 +17,17 @@
 .manager-nav-btn {
   padding: 6px 14px;
   background: none;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid transparent;
+  border-radius: 20px;
   color: #9ca3af;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 700;
   cursor: pointer;
+}
+
+.manager-nav-btn:not(.active):hover {
+  border-color: #6b7280;
+  color: #f3f4f6;
 }
 
 .manager-signout-btn {
@@ -38,9 +43,9 @@
 }
 
 .manager-nav-btn.active {
-  background: #4b5563;
-  color: #f3f4f6;
-  font-weight: 600;
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
 }
 
 .manager-content {
@@ -60,11 +65,13 @@
   padding: 24px;
 }
 
-.manager-section h2 {
+.manager-section h2,
+.manager-section-heading {
   margin: 0 0 16px;
   font-size: 1.25rem;
   font-weight: 700;
   font-family: inherit;
+  color: #111827;
 }
 
 .manager-menu-form {

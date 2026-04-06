@@ -204,7 +204,7 @@ const MenuEditPage = () => {
 
       <div className="manager-content">
         <div className="manager-section">
-          <h2>Menu Items</h2>
+          <h2>Edit Menu</h2>
 
           <div className="employees-controls">
             <input
