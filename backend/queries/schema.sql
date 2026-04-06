@@ -16,12 +16,23 @@ DROP TABLE IF EXISTS Inventory CASCADE;
 
 DROP TABLE IF EXISTS Employee CASCADE;
 
+DROP TABLE IF EXISTS Customer CASCADE;
+
 CREATE TABLE Employee (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
     pin_hash VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE Customer (
+    id SERIAL PRIMARY KEY,
+    google_sub VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255),
+    name VARCHAR(255),
+    picture_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Inventory (
@@ -71,6 +82,7 @@ CREATE TABLE ProductModifier (
 CREATE TABLE "order" (
     id SERIAL PRIMARY KEY,
     employee_id INT REFERENCES Employee (id),
+    customer_id INT REFERENCES Customer (id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total_tax FLOAT DEFAULT 0.0,
     total_final FLOAT DEFAULT 0.0,

@@ -1,5 +1,7 @@
 const express = require("express");
 const cors = require("cors");
+const session = require("express-session");
+const passport = require("passport");
 
 const dbTestRouter = require("./routes/db-test");
 const employeesRouter = require("./routes/employees");
@@ -12,8 +14,31 @@ const reportsRouter = require("./routes/reports");
 
 const app = express();
 
-app.use(cors());
+const clientOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+
+app.use(
+  cors({
+    origin: clientOrigin,
+    credentials: true,
+  })
+);
 app.use(express.json());
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev_secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/db-test", dbTestRouter);
 app.use("/employees", employeesRouter);

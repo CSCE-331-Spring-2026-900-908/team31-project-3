@@ -49,12 +49,13 @@ async function fetchAllowedModifiers(client, productId, modifierIds) {
 }
 
 router.post("/", async (req, res) => {
-  const { employeeId } = req.body || {};
+  const { employeeId, customerId } = req.body || {};
+  const authCustomerId = req.user?.id || customerId || null;
 
   try {
     const result = await db.query(
-      "INSERT INTO \"order\" (employee_id, created_at, total_tax, total_final) VALUES ($1, NOW(), 0, 0) RETURNING id;",
-      [employeeId || null]
+      "INSERT INTO \"order\" (employee_id, customer_id, created_at, total_tax, total_final) VALUES ($1, $2, NOW(), 0, 0) RETURNING id;",
+      [employeeId || null, authCustomerId]
     );
 
     res.status(201).json({ orderId: result.rows[0].id });
