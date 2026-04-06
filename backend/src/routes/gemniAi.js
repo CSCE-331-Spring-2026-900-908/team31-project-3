@@ -65,12 +65,21 @@ const pool = require("../../server/db");
 
 const airouter = express.Router();
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GEMINI_KEY,
-});
+const geminiKey = process.env.GEMINI_KEY || "";
+const ai = geminiKey
+    ? new GoogleGenAI({
+        apiKey: geminiKey,
+    })
+    : null;
 
 airouter.post("/chat", async (req, res) => {
     const { message } = req.body;
+
+    if (!ai) {
+        return res.status(503).json({
+            error: "Gemini is not configured on this server. Set GEMINI_KEY in Vercel environment variables.",
+        });
+    }
 
     const chatbotRules = `
 You are an assistant for a boba restaurant. Be polite to the customer.
