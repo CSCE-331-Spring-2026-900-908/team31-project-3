@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API_BASE_URL from "../config/apiBaseUrl";
+import Chatbot from "./Chatbot";
+import "./Customer.css";
 
 const Customer = () => {
   const [user, setUser] = useState(null);
@@ -47,34 +49,48 @@ const Customer = () => {
   };
 
   return (
-    <div style={{ padding: "24px" }}>
-      <h1>Customer View</h1>
+    <div className="customer-page">
+      <div className="customer-page__content">
+        <h1 className="customer-page__title">Self Serve Kiosk</h1>
 
-      {status === "loading" ? <p>Checking login...</p> : null}
-      {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
+        {status === "loading" ? (
+          <p className="customer-page__muted">Checking login...</p>
+        ) : null}
+        {error ? <p className="customer-page__error">{error}</p> : null}
 
-      {user ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {user.picture_url ? (
-            <img
-              src={user.picture_url}
-              alt="Profile"
-              style={{ width: "40px", height: "40px", borderRadius: "9999px" }}
-            />
-          ) : null}
-          <div>
-            <div style={{ fontWeight: 600 }}>{user.name || user.email}</div>
-            <div style={{ fontSize: "0.85rem", color: "#6b7280" }}>{user.email}</div>
+        {user ? (
+          <div className="customer-page__session">
+            {user.picture_url ? (
+              <img
+                src={user.picture_url}
+                alt="Profile"
+                className="customer-page__avatar"
+              />
+            ) : null}
+            <div>
+              <div className="customer-page__name">{user.name || user.email}</div>
+              <div className="customer-page__email">{user.email}</div>
+            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="customer-page__button customer-page__button--secondary"
+            >
+              Sign out
+            </button>
           </div>
-          <button type="button" onClick={handleLogout} style={{ marginLeft: "16px" }}>
-            Sign out
+        ) : (
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="customer-page__button"
+          >
+            Sign in with Google
           </button>
-        </div>
-      ) : (
-        <button type="button" onClick={handleGoogleLogin}>
-          Sign in with Google
-        </button>
-      )}
+        )}
+      </div>
+
+      <Chatbot />
     </div>
   );
 };
