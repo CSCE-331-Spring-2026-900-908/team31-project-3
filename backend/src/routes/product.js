@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT product_id, name, base_price, category_name, is_active, image_url FROM product ORDER BY name LIMIT 200"
+      "SELECT product_id, name, base_price, category_name, can_be_served_hot, is_active, image_url FROM product ORDER BY name LIMIT 200"
     );
     res.json(result.rows);
   } catch (err) {
@@ -16,14 +16,20 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { name, base_price, category_name, is_active } = req.body;
+  const { name, base_price, category_name, can_be_served_hot, is_active } = req.body;
   if (!name || base_price === undefined) {
     return res.status(400).json({ error: "name and base_price are required." });
   }
   try {
     const result = await db.query(
-      "INSERT INTO product (name, base_price, category_name, is_active) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name.trim(), Number(base_price), category_name || null, is_active !== false]
+      "INSERT INTO product (name, base_price, category_name, can_be_served_hot, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [
+        name.trim(),
+        Number(base_price),
+        category_name || null,
+        Boolean(can_be_served_hot),
+        is_active !== false,
+      ]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -36,14 +42,21 @@ router.put("/:id", async (req, res) => {
   if (!Number.isInteger(productId)) {
     return res.status(400).json({ error: "Invalid product id." });
   }
-  const { name, base_price, category_name, is_active } = req.body;
+  const { name, base_price, category_name, can_be_served_hot, is_active } = req.body;
   if (!name || base_price === undefined) {
     return res.status(400).json({ error: "name and base_price are required." });
   }
   try {
     const result = await db.query(
-      "UPDATE product SET name = $1, base_price = $2, category_name = $3, is_active = $4 WHERE product_id = $5 RETURNING *",
-      [name.trim(), Number(base_price), category_name || null, Boolean(is_active), productId]
+      "UPDATE product SET name = $1, base_price = $2, category_name = $3, can_be_served_hot = $4, is_active = $5 WHERE product_id = $6 RETURNING *",
+      [
+        name.trim(),
+        Number(base_price),
+        category_name || null,
+        Boolean(can_be_served_hot),
+        Boolean(is_active),
+        productId,
+      ]
     );
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Product not found." });
