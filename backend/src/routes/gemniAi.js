@@ -100,7 +100,7 @@ Rules:
         console.log("has GEMINI_KEY:", !!process.env.GEMINI_KEY);
 
         const result = await pool.query(`
-            SELECT name, base_price, description, category_name
+            SELECT name, base_price, description, category_name, can_be_served_hot
             FROM product
             WHERE is_active = true
             LIMIT 50
@@ -112,7 +112,7 @@ Rules:
         const menuText = result.rows
             .map(
                 (item) =>
-                    `${item.name} - ${item.category_name} - $${item.base_price} - ${item.description || "No description available"}`
+                    `${item.name} - ${item.category_name} - $${item.base_price} - Can be served hot: ${item.can_be_served_hot ? "Yes" : "No"} - ${item.description || "No description available"}`
             )
             .join("\n");
 

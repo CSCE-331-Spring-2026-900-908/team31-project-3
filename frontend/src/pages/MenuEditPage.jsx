@@ -17,12 +17,14 @@ const MenuEditPage = () => {
   const [newName, setNewName] = useState("");
   const [newCategory, setNewCategory] = useState("");
   const [newPrice, setNewPrice] = useState("");
+  const [newCanBeServedHot, setNewCanBeServedHot] = useState(false);
   const [newActive, setNewActive] = useState(true);
 
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] = useState("");
   const [editPrice, setEditPrice] = useState("");
+  const [editCanBeServedHot, setEditCanBeServedHot] = useState(false);
   const [editActive, setEditActive] = useState(true);
 
   const loadMenuItems = async () => {
@@ -79,6 +81,7 @@ const MenuEditPage = () => {
           name: trimmedName,
           base_price: parsedPrice,
           category_name: newCategory.trim() || null,
+          can_be_served_hot: newCanBeServedHot,
           is_active: newActive,
         }),
       });
@@ -90,6 +93,7 @@ const MenuEditPage = () => {
       setNewName("");
       setNewCategory("");
       setNewPrice("");
+      setNewCanBeServedHot(false);
       setNewActive(true);
       setShowAddModal(false);
     } catch (err) {
@@ -102,6 +106,7 @@ const MenuEditPage = () => {
     setEditName(item.name || "");
     setEditCategory(item.category_name || "");
     setEditPrice(String(item.base_price ?? ""));
+    setEditCanBeServedHot(item.can_be_served_hot === true);
     setEditActive(item.is_active !== false);
     setError("");
   };
@@ -111,6 +116,7 @@ const MenuEditPage = () => {
     setEditName("");
     setEditCategory("");
     setEditPrice("");
+    setEditCanBeServedHot(false);
     setEditActive(true);
   };
 
@@ -136,6 +142,7 @@ const MenuEditPage = () => {
           name: trimmedName,
           base_price: parsedPrice,
           category_name: editCategory.trim() || null,
+          can_be_served_hot: editCanBeServedHot,
           is_active: editActive,
         }),
       });
@@ -236,6 +243,7 @@ const MenuEditPage = () => {
                   <th className="menu-col-name">Name</th>
                   <th className="menu-col-category">Category</th>
                   <th className="menu-col-price">Price</th>
+                  <th className="menu-col-active">Can Be Served Hot</th>
                   <th className="menu-col-active">Active</th>
                   <th className="menu-col-actions">Actions</th>
                 </tr>
@@ -281,6 +289,17 @@ const MenuEditPage = () => {
                           />
                         ) : (
                           `$${Number(item.base_price).toFixed(2)}`
+                        )}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                          <input
+                            type="checkbox"
+                            checked={editCanBeServedHot}
+                            onChange={(e) => setEditCanBeServedHot(e.target.checked)}
+                          />
+                        ) : (
+                          item.can_be_served_hot ? "Yes" : "No"
                         )}
                       </td>
                       <td>
@@ -336,7 +355,7 @@ const MenuEditPage = () => {
                 })}
                 {!loading && filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="manager-empty">
+                    <td colSpan={6} className="manager-empty">
                       No menu items found.
                     </td>
                   </tr>
@@ -393,6 +412,16 @@ const MenuEditPage = () => {
                     onChange={(e) => setNewPrice(e.target.value)}
                   />
 
+                  <label className="manager-modal-label" htmlFor="add-item-served-hot">
+                    Can Be Served Hot
+                  </label>
+                  <input
+                    id="add-item-served-hot"
+                    type="checkbox"
+                    checked={newCanBeServedHot}
+                    onChange={(e) => setNewCanBeServedHot(e.target.checked)}
+                  />
+
                   <label className="manager-modal-label" htmlFor="add-item-active">
                     Active
                   </label>
@@ -415,6 +444,7 @@ const MenuEditPage = () => {
                         setNewName("");
                         setNewCategory("");
                         setNewPrice("");
+                        setNewCanBeServedHot(false);
                         setNewActive(true);
                       }}
                     >
