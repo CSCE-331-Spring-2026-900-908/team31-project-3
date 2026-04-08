@@ -18,7 +18,6 @@ export async function sendGemniMessage(message){
 
     
     return data.text;
-
  }
 // export async function sendGemniMessage(message) {
 //     const response = await fetch(`${API_BASE_URL}/gemniAi/chat`, {
