@@ -1,0 +1,23 @@
+.weatherDisplay {
+    position:fixed;
+    right: 0;
+    top: 0;
+    width: 10%;
+    height: 20%;
+    font-size: 7px;
+    display: flexbox;
+    flex-direction: column;
+    text-align: center;
+    background-color: pink;
+    border-radius: 40px;
+    gap: 0px;
+
+}
+.weatherDisplay img{
+   
+    margin:0;
+}
+.weatherDisplay h1{
+   
+    margin:0;
+}
