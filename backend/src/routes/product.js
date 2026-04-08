@@ -7,7 +7,67 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT product_id, name, base_price, category_name, can_be_served_hot, is_active, image_url FROM product ORDER BY name LIMIT 200"
+      `WITH unique_products AS (
+        SELECT DISTINCT ON (product_id)
+          product_id,
+          name,
+          base_price,
+          category_name,
+          can_be_served_hot,
+          is_active,
+          image_url
+        FROM product
+        ORDER BY product_id, name
+      )
+      SELECT
+        p.product_id,
+        p.name,
+        p.base_price,
+        p.category_name,
+        p.can_be_served_hot,
+        p.is_active,
+        p.image_url,
+        COALESCE(di.dietary_tags, ARRAY[]::text[]) AS dietary_tags,
+        COALESCE(ai.allergen_tags, ARRAY[]::text[]) AS allergen_tags
+      FROM unique_products p
+      LEFT JOIN LATERAL (
+        SELECT ARRAY_REMOVE(
+          ARRAY[
+            CASE
+              WHEN COUNT(*) > 0
+                AND BOOL_AND(i.item_name !~* '(chicken|beef|pork|bacon|sausage|ham|turkey|fish|shrimp|crab|tuna|salmon|gelatin|egg|milk|cream|cheese|butter|yogurt|whey|casein|honey)')
+                THEN 'Vegan'
+            END
+          ],
+          NULL
+        ) AS dietary_tags
+        FROM productingredient pi
+        JOIN inventory i ON i.item_id = pi.item_id
+        WHERE pi.product_id = p.product_id
+      ) di ON TRUE
+      LEFT JOIN LATERAL (
+        SELECT ARRAY(
+          SELECT DISTINCT allergen
+          FROM productingredient pi
+          JOIN inventory i ON i.item_id = pi.item_id
+          CROSS JOIN LATERAL (
+            SELECT CASE WHEN i.item_name ~* '(milk|cream|cheese|butter|yogurt|whey|casein)' THEN 'Dairy' END AS allergen
+            UNION ALL
+            SELECT CASE WHEN i.item_name ~* '(peanut|nut|almond|walnut|cashew|pecan|pistachio|hazelnut)' THEN 'Nuts' END
+            UNION ALL
+            SELECT CASE WHEN i.item_name ~* '(wheat|flour|bread|gluten)' THEN 'Gluten' END
+            UNION ALL
+            SELECT CASE WHEN i.item_name ~* '(egg)' THEN 'Egg' END
+            UNION ALL
+            SELECT CASE WHEN i.item_name ~* '(soy|tofu)' THEN 'Soy' END
+          ) derived
+          WHERE allergen IS NOT NULL
+            AND pi.product_id = p.product_id
+          ORDER BY allergen
+        ) AS allergen_tags
+      ) ai ON TRUE
+      ORDER BY p.name, p.product_id
+      LIMIT 200`
     );
     res.json(result.rows);
   } catch (err) {
