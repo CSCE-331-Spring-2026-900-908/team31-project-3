@@ -2,9 +2,16 @@ import { getLocation } from "./Getlocation";
 
 const API_KEY = "e3f87a17d8ced33be2deee93b4c29bca"
 
-export async function getWeather(){
-    const location = await getLocation();
-    const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=imperial`
+export async function getWeather() {
+    let location;
+    try {
+        // Wait max 5 seconds, if it takes longer, it might hang so fallback immediately if error
+        location = await getLocation();
+    } catch (err) {
+        console.warn("Geolocation blocked or failed. Falling back to College Station.", err);
+        location = { latitude: 30.6280, longitude: -96.3344 };
+    }
+    const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=imperial`;
     
     const response = await fetch(WEATHER_API_URL);
     
