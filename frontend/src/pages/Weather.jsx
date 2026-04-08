@@ -1,6 +1,8 @@
+import './Weather.css'
 import { getWeather } from "./WeatherAPI";
 import { useEffect, useState } from "react";
 import { getLocation } from "./Getlocation";
+
 
 const Weather = () =>{
     const [weather, setWeather] = useState(null);
@@ -29,14 +31,17 @@ const Weather = () =>{
     loadLoaction();
     }, []);
 
+    
     return(
-    <div>
-        <h1>The Weather is {weather ? weather.temp + " in " + weather.city  : "Weather can not be provided"}</h1>
-        <h1>Your location is {
+    <div className='weatherDisplay'>
+        <img src={weather ? weather.icon : "Loading"}></img>
+        <h1>{weather ? weather.temp + "°F" : "Loading"}</h1>
+        {/* <h1>Your location is {
                     location
                         ? `${location.latitude}, ${location.longitude}`
                         : "Loading location..."
-        }</h1>
+        }</h1> */}
+        <h1>{weather ? weather.city : "Loading"}</h1>
     </div>
     )
 }
