@@ -19,10 +19,6 @@ export async function getLocation() {
                 reject(error);
             },
 
-            {
-                    enableHighAccuracy: true,
-            }
-
         );
 
     });
