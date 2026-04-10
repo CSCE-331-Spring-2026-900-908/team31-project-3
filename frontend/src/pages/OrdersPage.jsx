@@ -12,6 +12,13 @@ const OrdersPage = ({ cashierMode = false }) => {
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Rewards state
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [linkedCustomer, setLinkedCustomer] = useState(null);
+  const [redeemVoucher, setRedeemVoucher] = useState(false);
+  const [lookupMessage, setLookupMessage] = useState("");
+  const [isRewardsExpanded, setIsRewardsExpanded] = useState(false);
+
   useEffect(() => {
     fetch(`${API_BASE_URL}/product`)
       .then((r) => r.json())
@@ -43,7 +50,80 @@ const OrdersPage = ({ cashierMode = false }) => {
   const removeItem = (id) =>
     setOrder((prev) => prev.filter((i) => i.product_id !== id));
 
-  const total = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
+  const handleLookup = async () => {
+    if (!customerEmail.trim()) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/customers/lookup?email=${encodeURIComponent(customerEmail)}`);
+      if (!res.ok) {
+        setLookupMessage("Customer not found.");
+        setLinkedCustomer(null);
+        setRedeemVoucher(false);
+        return;
+      }
+      const data = await res.json();
+      setLinkedCustomer(data);
+      setLookupMessage("Account linked!");
+    } catch (err) {
+      setLookupMessage("Error looking up account.");
+    }
+  };
+
+  const submitOrder = async () => {
+    try {
+      // 1. Create Order
+      const orderReq = await fetch(`${API_BASE_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId: 1, customerId: linkedCustomer?.id })
+      });
+      const orderData = await orderReq.json();
+      const orderId = orderData.orderId;
+
+      // 2. Add Items
+      for (const item of order) {
+        await fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: item.product_id,
+            quantity: item.qty,
+            modifiers: []
+          })
+        });
+      }
+
+      // 3. Checkout
+      await fetch(`${API_BASE_URL}/orders/${orderId}/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          redeemVoucher: redeemVoucher, 
+          customerId: linkedCustomer?.id 
+        })
+      });
+
+      alert("Order submitted successfully!");
+      setOrder([]);
+      setLinkedCustomer(null);
+      setCustomerEmail("");
+      setRedeemVoucher(false);
+      setLookupMessage("");
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting order.");
+    }
+  };
+
+  const subtotal = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
+
+  let discount = 0;
+  if (redeemVoucher && order.length > 0) {
+    const maxPrice = Math.max(...order.map(i => i.base_price));
+    discount = maxPrice;
+  }
+  
+  const tax = Math.max(0, (subtotal - discount) * 0.0825);
+  const total = Math.max(0, subtotal - discount) + tax;
 
   const handleTabClick = (t) => {
     if (t === "Orders") return;
@@ -146,7 +226,77 @@ const OrdersPage = ({ cashierMode = false }) => {
               <p className="orders-empty">No items added yet.</p>
             )}
           </div>
+
+          <div className="orders-rewards-panel">
+            <h4 className="orders-rewards-heading">Rewards Account</h4>
+            {!linkedCustomer ? (
+              !isRewardsExpanded ? (
+                <button 
+                  className="orders-rewards-btn"
+                  style={{ background: '#e5e7eb', color: '#374151', border: '1px dashed #9ca3af' }}
+                  onClick={() => setIsRewardsExpanded(true)}
+                >
+                  + Link Rewards Account
+                </button>
+              ) : (
+                <div>
+                  <input 
+                    type="email" 
+                    placeholder="Customer Email" 
+                    value={customerEmail} 
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    className="orders-rewards-input"
+                  />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={handleLookup} className="orders-rewards-btn">Lookup</button>
+                    <button 
+                      onClick={() => { setIsRewardsExpanded(false); setCustomerEmail(""); setLookupMessage(""); }} 
+                      className="orders-rewards-btn" 
+                      style={{ background: '#9ca3af' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {lookupMessage && <p className="orders-rewards-msg">{lookupMessage}</p>}
+                </div>
+              )
+            ) : (
+              <div>
+                <p className="orders-rewards-customer"><strong>{linkedCustomer.name || linkedCustomer.email}</strong></p>
+                <p className="orders-rewards-customer">Points: {linkedCustomer.points}</p>
+                {linkedCustomer.points >= 65 && (
+                  <button 
+                    onClick={() => setRedeemVoucher(!redeemVoucher)}
+                    className={`orders-rewards-voucher-btn ${redeemVoucher ? 'applied' : ''}`}
+                  >
+                    {redeemVoucher ? 'Voucher Applied (-65 pts)' : 'Apply Free Drink (' + String.fromCharCode(8211) + '65 pts)'}
+                  </button>
+                )}
+                <button 
+                  onClick={() => { setLinkedCustomer(null); setRedeemVoucher(false); setCustomerEmail(""); setLookupMessage(""); }}
+                  className="orders-rewards-remove-btn"
+                >
+                  Remove Account
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="orders-pinned">
+            {discount > 0 && (
+              <div className="orders-sub-row" style={{ color: '#28a745' }}>
+                <span>Discount</span>
+                <span>-${discount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="orders-sub-row">
+              <span>Subtotal</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="orders-sub-row">
+              <span>Tax</span>
+              <span>${tax.toFixed(2)}</span>
+            </div>
             <div className="orders-total-row">
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
@@ -154,10 +304,7 @@ const OrdersPage = ({ cashierMode = false }) => {
             <button
               className="orders-submit-btn"
               disabled={order.length === 0}
-              onClick={() => {
-                alert("Order submitted!");
-                setOrder([]);
-              }}
+              onClick={submitOrder}
             >
               Submit Order
             </button>

@@ -16,6 +16,7 @@ const LEGEND_ORDER = ["Vegan", "Dairy", "Nuts", "Gluten", "Egg", "Soy"];
 const MenuBoard = () => {
   const [products, setProducts] = useState([]);
   const [productModifiers, setProductModifiers] = useState([]);
+  const [bestSellersNames, setBestSellersNames] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const normalizeTags = (tags) => {
@@ -68,6 +69,14 @@ const MenuBoard = () => {
       .then((r) => r.json())
       .then((data) => setProductModifiers(Array.isArray(data) ? data : []))
       .catch(console.error);
+    fetch(`${API_BASE_URL}/reports?report=Top%205%20Products&range=month`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.rows) {
+          setBestSellersNames(data.rows.map((row) => row["Product Name"]).filter(Boolean));
+        }
+      })
+      .catch(console.error);
   };
 
   useEffect(() => {
@@ -101,7 +110,16 @@ const MenuBoard = () => {
     };
   });
 
-  const displaySections = [...menuSections];
+  const bestSellerProducts = bestSellersNames
+    .map((name) => allDedupedProducts.find((p) => p.name === name))
+    .filter(Boolean);
+
+  const bestSellerSection =
+    bestSellerProducts.length > 0
+      ? [{ key: "best-sellers", title: "Best Sellers ⭐", items: bestSellerProducts }]
+      : [];
+
+  const displaySections = [...bestSellerSection, ...menuSections];
 
   const toppingSections =
     toppingItems.length > 0
