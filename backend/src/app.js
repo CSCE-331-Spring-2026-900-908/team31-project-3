@@ -12,6 +12,7 @@ const ordersRouter = require("./routes/orders");
 const authRouter = require("./routes/auth");
 const reportsRouter = require("./routes/reports");
 const gemniAiRouter = require("./routes/gemniAi");
+const customersRouter = require("./routes/customers");
 
 
 const app = express();
@@ -71,6 +72,7 @@ app.use("/orders", ordersRouter);
 app.use("/auth", authRouter);
 app.use("/reports", reportsRouter);
 app.use("/gemniAi", gemniAiRouter);
+app.use("/customers", customersRouter);
 
 app.get("/", (req, res) => {
   res.json({ status: "ok" });

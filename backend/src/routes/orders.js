@@ -306,6 +306,7 @@ router.delete("/:orderId/items/:detailId", async (req, res) => {
 
 router.post("/:orderId/checkout", async (req, res) => {
   const orderId = Number(req.params.orderId);
+  const { redeemVoucher, customerId } = req.body || {};
 
   if (!Number.isInteger(orderId)) {
     return res.status(400).json({ error: "Invalid orderId" });
@@ -315,6 +316,11 @@ router.post("/:orderId/checkout", async (req, res) => {
 
   try {
     await client.query("BEGIN");
+
+    // If a customerId is provided at checkout, associate it with the order
+    if (customerId) {
+       await client.query("UPDATE \"order\" SET customer_id = $1 WHERE id = $2;", [customerId, orderId]);
+    }
 
     await client.query(
       "UPDATE inventory SET quantity = quantity - subq.total_used " +
@@ -336,7 +342,58 @@ router.post("/:orderId/checkout", async (req, res) => {
       [orderId]
     );
 
-    const totals = await recalcOrderTotals(client, orderId);
+    let totals = await recalcOrderTotals(client, orderId);
+
+    // Points logic
+    let customerRow = null;
+    if (customerId) {
+      const custRes = await client.query("SELECT * FROM customer WHERE id = $1;", [customerId]);
+      if (custRes.rowCount > 0) {
+        customerRow = custRes.rows[0];
+      }
+    }
+
+    let appliedDiscount = 0;
+
+    if (redeemVoucher && customerRow && customerRow.points >= 65) {
+      // Find the most expensive drink in the order
+      const expensiveRes = await client.query(
+        "SELECT MAX(od.sold_price + COALESCE(mods.mod_total, 0)) AS max_price " +
+        "FROM orderdetail od " +
+        "LEFT JOIN (SELECT order_detail_id, SUM(price_charged) AS mod_total FROM ordermodifier GROUP BY order_detail_id) mods " +
+        "ON od.id = mods.order_detail_id " +
+        "WHERE od.order_id = $1;",
+        [orderId]
+      );
+      
+      const maxPrice = Number(expensiveRes.rows[0].max_price || 0);
+      
+      if (maxPrice > 0) {
+        appliedDiscount = maxPrice;
+        const newSubtotal = Math.max(0, totals.subtotal - appliedDiscount);
+        const newTax = roundMoney(newSubtotal * TAX_RATE);
+        const newTotal = roundMoney(newSubtotal + newTax);
+        
+        await client.query(
+          "UPDATE \"order\" SET total_tax = $1, total_final = $2 WHERE id = $3;",
+          [newTax, newTotal, orderId]
+        );
+        
+        totals = { subtotal: newSubtotal, tax: newTax, total: newTotal, discount: appliedDiscount };
+
+        // Deduct 65 points for voucher
+        await client.query("UPDATE customer SET points = points - 65 WHERE id = $1;", [customerId]);
+        customerRow.points -= 65;
+      }
+    }
+
+    // Earn points based on final total
+    if (customerRow) {
+      const earnedPoints = Math.floor(totals.total);
+      if (earnedPoints > 0) {
+        await client.query("UPDATE customer SET points = points + $1 WHERE id = $2;", [earnedPoints, customerId]);
+      }
+    }
 
     await client.query("COMMIT");
 

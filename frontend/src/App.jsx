@@ -23,7 +23,7 @@ const App = () => (
     <Route path="/cashier" element={<OrdersPage cashierMode />} />
     <Route path="/inventory" element={<InventoryPage />} />
     <Route path="/menu-board" element={<MenuBoard />} />
-    <Route path="/customer" element={<Customer />} />
+    <Route path="/customer" element={<Kiosk />} />
     <Route path="/manager" element={<Manager />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
