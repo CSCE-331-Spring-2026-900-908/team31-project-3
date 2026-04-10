@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Manager.css";
 import "./OrdersPage.css";
 import API_BASE_URL from "../config/apiBaseUrl";
+import { getWeather } from "./WeatherAPI";
 
 const MANAGER_TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
 
@@ -11,7 +12,8 @@ const OrdersPage = ({ cashierMode = false }) => {
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-
+  const [temp, setTemp] = useState(null);
+  
   useEffect(() => {
     fetch(`${API_BASE_URL}/product`)
       .then((r) => r.json())
@@ -19,15 +21,47 @@ const OrdersPage = ({ cashierMode = false }) => {
       .catch(console.error);
   }, []);
 
+    useEffect(() => {
+        async function loadWeather() {
+            const data = await getWeather();
+            setTemp(data);
+        }
+        loadWeather();
+    }, []);
+
   const grouped = useMemo(() => {
     const map = new Map();
+    const rec = "Recommended Based On Weather"
+    
+    const recArray = []
+    for(const p of products){
+      if(temp > 50 && !p.can_be_served_hot){
+        recArray.push(p);
+        continue;
+      }
+
+      else if(temp < 50 && p.can_be_served_hot){
+        recArray.push(p);
+        continue;
+      }
+    }
+
+    const shuffled = [...recArray].sort(() => 0.5 - Math.random());
+    const randomFive = shuffled.slice(0, 5);
+    map.set(rec,randomFive);
+
     for (const p of products) {
       const cat = p.category_name || "Other";
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat).push(p);
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
-  }, [products]);
+
+    return [...map.entries()].sort(([a], [b]) => {
+    if (a === rec) return -1;
+    if (b === rec) return 1;
+    return a.localeCompare(b);
+  });
+  }, [products,temp]);
 
   const addItem = (product) => {
     setOrder((prev) => {
