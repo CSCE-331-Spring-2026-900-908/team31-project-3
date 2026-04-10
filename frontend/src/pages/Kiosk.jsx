@@ -100,58 +100,60 @@ const Kiosk = ({ showNav = false }) => {
           <button className="kiosk-back-btn" onClick={() => endCustomization()}>Back to Menu</button>
             <h2 className="kiosk-heading">{currItem.name}</h2>
           </div>
-          <div className="kiosk-menu">
-            <h2 className="kiosk-heading">Toppings</h2>
-            <div className="kiosk-product-grid">
-              {productModifiers.filter((m) => m.category === "Topping").map((m) => (
-                <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                  {m.name} {currItem.modifiers.find((i) => i.option_id === m.option_id) ? `(${currItem.modifiers.find((i) => i.option_id === m.option_id).qty})` : ""}
-                </button>
-              ))}
+        <div className="kiosk-display-layout">
+            <div className="kiosk-menu">
+              <h2 className="kiosk-heading">Toppings</h2>
+              <div className="kiosk-product-grid">
+                {productModifiers.filter((m) => m.category === "Topping").map((m) => (
+                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
+                    {m.name} {currItem.modifiers.find((i) => i.option_id === m.option_id) ? `(${currItem.modifiers.find((i) => i.option_id === m.option_id).qty})` : ""}
+                  </button>
+                ))}
+              </div>
+              <h2 className="kiosk-heading">Ice Level</h2>
+              <div className="kiosk-product-grid">
+                {productModifiers.filter((m) => m.category === "Ice Level").map((m) => (
+                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+              <h2 className="kiosk-heading">Sugar Level</h2>
+              <div className="kiosk-product-grid">
+                {productModifiers.filter((m) => m.category === "Sugar Level").map((m) => (
+                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+              <h2 className="kiosk-heading">Size</h2>
+              <div className="kiosk-product-grid">
+                {productModifiers.filter((m) => m.category === "Size").map((m) => (
+                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+              <h2 className="kiosk-heading">Milk Type</h2>
+              <div className="kiosk-product-grid">
+                {productModifiers.filter((m) => m.category === "Milk Type").map((m) => (
+                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
+                    {m.name}
+                  </button>
+                ))}
+              </div>
             </div>
-            <h2 className="kiosk-heading">Ice Level</h2>
-            <div className="kiosk-product-grid">
-              {productModifiers.filter((m) => m.category === "Ice Level").map((m) => (
-                <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                  {m.name}
-                </button>
-              ))}
-            </div>
-            <h2 className="kiosk-heading">Sugar Level</h2>
-            <div className="kiosk-product-grid">
-              {productModifiers.filter((m) => m.category === "Sugar Level").map((m) => (
-                <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                  {m.name}
-                </button>
-              ))}
-            </div>
-            <h2 className="kiosk-heading">Size</h2>
-            <div className="kiosk-product-grid">
-              {productModifiers.filter((m) => m.category === "Size").map((m) => (
-                <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                  {m.name}
-                </button>
-              ))}
-            </div>
-            <h2 className="kiosk-heading">Milk Type</h2>
-            <div className="kiosk-product-grid">
-              {productModifiers.filter((m) => m.category === "Milk Type").map((m) => (
-                <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                  {m.name}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div className="kiosk-sidebar">
-            <h2 className="kiosk-heading">Current Order</h2>
-            <div className="kiosk-order-list">
-              {order.map((item) => (
-                <div key={item.product_id} className="kiosk-order-item">
-                  <span>{item.name}</span>
-                  <button className="kiosk-remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
-                </div>
-              ))}
+            <div className="kiosk-sidebar">
+              <h2 className="kiosk-heading">Current Order</h2>
+              <div className="kiosk-order-list">
+                {order.map((item) => (
+                  <div key={item.product_id} className="kiosk-order-item">
+                    <span>{item.name}</span>
+                    <button className="kiosk-remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -194,11 +196,48 @@ const Kiosk = ({ showNav = false }) => {
             <button key={category} className="kiosk-category-btn" onClick={() => setSelectedCategory(category)}>{category}</button>
           )}
         </div>
+        <div className="kiosk-display-layout">
+          <div className="kiosk-menu">
+            <h2 className="kiosk-heading">Menu</h2>
+            <div className="kiosk-product-grid">
+              {products.filter((p) => p.category_name === selectedCategory).map((p) => (
+                <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
+          <div className="kiosk-sidebar">
+            <h2 className="kiosk-heading">Current Order</h2>
+            <div className="kiosk-order-list">
+              {order.map((item) => (
+                <div key={item.product_id} className="kiosk-order-item">
+                  <span>{item.name}</span>
+                  <button className="kiosk-remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
+                </div>
+              ))}
+            </div>
+            <div className="kiosk-pinned">
+              <div className="kiosk-total-row">
+                <span>Total</span>
+                <span>${total.toFixed(2)}</span>
+              </div>
+              <button className="kiosk-submit-btn" disabled={order.length === 0} onClick={() => { alert("Order submitted!"); setOrder([]); }}>
+                Submit Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div className="kiosk-layout">
+      <div className="kiosk-display-layout">
         <div className="kiosk-menu">
           <h2 className="kiosk-heading">Menu</h2>
           <div className="kiosk-product-grid">
-            {products.filter((p) => p.category_name === selectedCategory).map((p) => (
+            {products.map((p) => (
               <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
                 {p.name}
               </button>
@@ -225,40 +264,6 @@ const Kiosk = ({ showNav = false }) => {
               Submit Order
             </button>
           </div>
-        </div>
-      </div>
-    </div>
-  ) : (
-    <div className="kiosk-layout">
-      <div className="kiosk-menu">
-        <h2 className="kiosk-heading">Menu</h2>
-        <div className="kiosk-product-grid">
-          {products.map((p) => (
-            <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
-              {p.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="kiosk-sidebar">
-        <h2 className="kiosk-heading">Current Order</h2>
-        <div className="kiosk-order-list">
-          {order.map((item) => (
-            <div key={item.product_id} className="kiosk-order-item">
-              <span>{item.name}</span>
-              <button className="kiosk-remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
-            </div>
-          ))}
-        </div>
-        <div className="kiosk-pinned">
-          <div className="kiosk-total-row">
-            <span>Total</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
-          <button className="kiosk-submit-btn" disabled={order.length === 0} onClick={() => { alert("Order submitted!"); setOrder([]); }}>
-            Submit Order
-          </button>
         </div>
       </div>
     </div>
