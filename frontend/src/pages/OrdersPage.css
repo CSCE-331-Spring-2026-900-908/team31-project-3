@@ -238,13 +238,23 @@
   align-items: stretch;
 }
 
+.orders-sub-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding-top: 6px;
+  color: #4b5563;
+}
+
 .orders-total-row {
   display: flex;
   justify-content: space-between;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 6px;
+  border-top: 1.5px solid #e5e7eb;
 }
 
 .orders-submit-btn {
@@ -261,4 +271,87 @@
 .orders-submit-btn:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+}
+
+/* ── Rewards Panel ── */
+.orders-rewards-panel {
+  padding: 16px;
+  background: #f6f7fb;
+  border-radius: 12px;
+  margin-top: auto;
+  margin-bottom: 20px;
+}
+.orders-rewards-heading {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+.orders-rewards-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.orders-rewards-btn {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #374151;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.orders-rewards-btn:hover {
+  background: #1f2937;
+}
+.orders-rewards-msg {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 8px 0 0;
+  text-align: center;
+}
+.orders-rewards-customer {
+  margin: 0 0 6px 0;
+  font-size: 0.95rem;
+}
+.orders-rewards-voucher-btn {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background: #0ea5e9;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  margin-top: 10px;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+.orders-rewards-voucher-btn.applied {
+  background: #22c55e;
+}
+.orders-rewards-remove-btn {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  background: transparent;
+  color: #ef4444;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  border: 1.5px solid #ef4444;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.orders-rewards-remove-btn:hover {
+  background: #ef4444;
+  color: white;
 }

@@ -76,7 +76,7 @@ const Chatbot = () => {
                             </div>
                             <div className="chatbot-header-info">
                                 <h2>Talk to Boju!</h2>
-                                <p>Aggie Boba Assistant</p>
+                                <p> Boba Assistant</p>
                             </div>
                         </div>
                         <button className="chatbot-close-btn" onClick={() => setVisible(false)} aria-label="Close">

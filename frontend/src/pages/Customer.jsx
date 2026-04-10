@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import API_BASE_URL from "../config/apiBaseUrl";
 import Chatbot from "./Chatbot";
 import "./Customer.css";
+import Weather from "./Weather";
 
 const Customer = () => {
   const [user, setUser] = useState(null);
@@ -89,8 +90,8 @@ const Customer = () => {
           </button>
         )}
       </div>
-
-      <Chatbot />
+      <Weather/>
+      <Chatbot/>
     </div>
   );
 };
