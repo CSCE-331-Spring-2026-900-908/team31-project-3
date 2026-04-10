@@ -12,6 +12,7 @@ const OrdersPage = ({ cashierMode = false }) => {
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [temp, setTemp] = useState(null);
 
   // Rewards state
   const [customerEmail, setCustomerEmail] = useState("");
@@ -30,7 +31,7 @@ const OrdersPage = ({ cashierMode = false }) => {
     useEffect(() => {
         async function loadWeather() {
             const data = await getWeather();
-            setTemp(data);
+            setTemp(data.temp);
         }
         loadWeather();
     }, []);
