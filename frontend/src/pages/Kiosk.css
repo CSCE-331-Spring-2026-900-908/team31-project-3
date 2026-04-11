@@ -72,6 +72,18 @@
   gap: 12px;
 }
 
+.kiosk-cart {
+  flex: 0 0 300px;
+  align-self: stretch;
+  background: #fff;
+  border: 1.5px solid #111827;
+  border-radius: 12px;
+  padding: 24px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 0;
+}
+
 .kiosk-product-btn {
   padding: 16px 8px;
   background: #fff;
@@ -131,6 +143,20 @@
   padding: 10px 12px;
   background: #f6f7fb;
   border-radius: 8px;
+}
+
+.kiosk-subtract-btn {
+  background: red;
+  border: solid black 1px;
+  cursor: pointer;
+  color: #9ca3af;
+}
+
+.kiosk-add-btn {
+  background: green;
+  border: solid black 1px;
+  cursor: pointer;
+  color: #9ca3af;
 }
 
 .kiosk-remove-btn {
