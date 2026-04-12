@@ -84,6 +84,14 @@
   min-height: 0;
 }
 
+.kiosk-product-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  margin-top: 8px;
+  border-radius: 6px;
+}
+
 .kiosk-product-btn {
   padding: 16px 8px;
   background: #fff;

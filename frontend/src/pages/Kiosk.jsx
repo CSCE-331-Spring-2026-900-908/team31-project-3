@@ -65,7 +65,7 @@ const Kiosk = ({ showNav = false }) => {
     }
     setOrder((prev) => {
       if (exclusive) return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.category !== modifier.category).concat({ ...modifier, qty: 1 }) } : item);
-      const existing = currItem.modifiers.find((i) => i.option_id === modifier.option_id);
+      const existing = prev.find((i) => i.instance_id === currItem.instance_id)?.modifiers.find((m) => m.option_id === modifier.option_id);
       if (existing) return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.map((m) => m.option_id === modifier.option_id ? { ...m, qty: m.qty + 1 } : m) } : item);
       // return [...prev, { ...item, modifiers: [...item.modifiers, { ...modifier, qty: 1 }] }];
       return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: [...item.modifiers, { ...modifier, qty: 1 }] } : item);
@@ -85,9 +85,12 @@ const Kiosk = ({ showNav = false }) => {
     if(currItem === null) {
       return;
     }
-    if(order.filter((item) => item.instance_id === currItem.instance_id)[0].modifiers.find((m) => m.option_id === option_id && m.qty + delta <= 0)) {
-      removeModifier({ option_id });
-      return;
+    if(order.find((item) => item.instance_id === currItem.instance_id).modifiers.find((m) => m.option_id === option_id && m.qty + delta <= 0)) {
+      // removeModifier({ option_id });
+      setOrder((prev) => {
+        return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.option_id !== option_id) } : item);
+      });
+      // return;
     }
     setOrder((prev) => {
       return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.map((i) => i.option_id === option_id ? { ...i, qty: Math.max(i.qty + delta, 0) } : i) } : item);
@@ -95,6 +98,11 @@ const Kiosk = ({ showNav = false }) => {
   };
 
   const setQtyItem = (instance_id, delta) => {
+    if(order.find((item) => item.instance_id === instance_id).qty + delta <= 0) {
+      // removeItem({ instance_id });
+      setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
+      return;
+    }
     setOrder((prev) => {
       return prev.map((item) => item.instance_id === instance_id ? { ...item, qty: Math.max(item.qty + delta, 0) } : item);
     });
@@ -112,7 +120,7 @@ const Kiosk = ({ showNav = false }) => {
     }
   };
 
-  const removeItem = (id) => setOrder((prev) => prev.filter((i) => i.instance_id !== id));
+  const removeItem = (instance_id) => setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
 
   const total = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
 
@@ -173,7 +181,7 @@ const Kiosk = ({ showNav = false }) => {
             <div className="kiosk-sidebar">
               <h2 className="kiosk-heading">{currItem.name}</h2>
               <div className="kiosk-order-list">
-                {order.filter(item => item.instance_id === currItem.instance_id)[0]?.modifiers.map((modifier) => (
+                {order.find(item => item.instance_id === currItem.instance_id)?.modifiers.map((modifier) => (
                   <div key={modifier.option_id} className="kiosk-order-item">
                     <span>{modifier.name}</span>
                     <button className="kiosk-subtract-btn" onClick={() => setQtyModifier(modifier.option_id, -1)}>-</button>
@@ -204,8 +212,12 @@ const Kiosk = ({ showNav = false }) => {
             <div className="kiosk-cart">
               {order.map((item) => (
                 <div key={item.product_id} className="kiosk-order-item">
-                  <span>{item.name} x{item.qty}</span>
+                  <span>{item.name}</span>
+                  <button className="kiosk-subtract-btn" onClick={() => setQtyItem(item.instance_id, -1)}>-</button>
+                  <span>{item.qty}</span>
+                  <button className="kiosk-add-btn" onClick={() => setQtyItem(item.instance_id, 1)}>+</button>
                   <button className="kiosk-remove-btn" onClick={() => customizeItem(item)}>EDIT</button>
+                  <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)}>REMOVE</button>
                 </div>
               ))}
             </div>
@@ -236,12 +248,13 @@ const Kiosk = ({ showNav = false }) => {
               {products.filter((p) => p.category_name === selectedCategory).map((p) => (
                 <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
                   {p.name}
+                  <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="kiosk-sidebar">
+          {/* <div className="kiosk-sidebar">
             <h2 className="kiosk-heading">Current Order</h2>
             <div className="kiosk-order-list">
               {order.map((item) => (
@@ -258,25 +271,27 @@ const Kiosk = ({ showNav = false }) => {
               </div>
               <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart</button>
             </div>
-          </div>
+          </div> */}
+          <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart ({order.length})</button>
         </div>
       </div>
     </div>
   ) : (
     <div className="kiosk-layout">
-      <div className="kiosk-display-layout">
+      {/* <div className="kiosk-display-layout"> */}
         <div className="kiosk-menu">
           <h2 className="kiosk-heading">Menu</h2>
           <div className="kiosk-product-grid">
             {products.map((p) => (
               <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
                 {p.name}
+                <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
               </button>
             ))}
           </div>
         </div>
 
-        <div className="kiosk-sidebar">
+        {/* <div className="kiosk-sidebar">
           <h2 className="kiosk-heading">Current Order</h2>
           <div className="kiosk-order-list">
             {order.map((item) => (
@@ -293,8 +308,9 @@ const Kiosk = ({ showNav = false }) => {
             </div>
             <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart</button>
           </div>
-        </div>
-      </div>
+        </div> */}
+        <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart ({order.length})</button>
+      {/* </div> */}
     </div>
   );
 };
