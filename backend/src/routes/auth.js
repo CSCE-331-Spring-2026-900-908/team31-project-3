@@ -5,6 +5,19 @@ const pool = require("../../server/db");
 
 const router = express.Router();
 
+const managerEmails = new Set(
+  (process.env.MANAGER_EMAILS ||
+    "nitheeshk@tamu.edu,longvo.work84@tamu.edu,abelasteway@tamu.edu,noahhiggins@tamu.edu,sanjitbhimanadham@tamu.edu")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+);
+
+const isManagerEmail = (email) => {
+  if (!email) return false;
+  return managerEmails.has(String(email).trim().toLowerCase());
+};
+
 const toErrorMessage = (err) => {
   if (!err) return "Unknown error";
   if (Array.isArray(err.errors) && err.errors.length > 0) {
@@ -93,20 +106,48 @@ if (!passport._strategy("google")) {
   );
 }
 
-router.get(
-  "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
+router.get("/google", (req, res, next) => {
+  const role = String(req.query.role || "").toLowerCase();
+  const state = role === "manager" ? "manager" : "customer";
+  passport.authenticate("google", { scope: ["profile", "email"], state })(
+    req,
+    res,
+    next
+  );
+});
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: `${clientUrl}/customer?auth=failed`,
-  }),
-  (req, res) => {
-    res.redirect(`${clientUrl}/customer?auth=success`);
-  }
-);
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate("google", (err, user) => {
+    const role = String(req.query.state || "").toLowerCase();
+
+    if (err || !user) {
+      const failureTarget =
+        role === "manager"
+          ? `${clientUrl}/manager?auth=failed`
+          : `${clientUrl}/customer?auth=failed`;
+      return res.redirect(failureTarget);
+    }
+
+    req.logIn(user, (loginErr) => {
+      if (loginErr) return next(loginErr);
+
+      if (role === "manager") {
+        if (!isManagerEmail(user.email)) {
+          return req.logout(() => {
+            req.session?.destroy(() => {
+              res.clearCookie("connect.sid");
+              res.redirect(`${clientUrl}/manager?auth=denied`);
+            });
+          });
+        }
+
+        return res.redirect(`${clientUrl}/orders`);
+      }
+
+      return res.redirect(`${clientUrl}/customer?auth=success`);
+    });
+  })(req, res, next);
+});
 
 router.get("/me", (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -114,6 +155,18 @@ router.get("/me", (req, res) => {
   }
 
   return res.json({ user: req.user });
+});
+
+router.get("/manager-status", (req, res) => {
+  if (!req.isAuthenticated || !req.isAuthenticated()) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+
+  if (!isManagerEmail(req.user?.email)) {
+    return res.status(403).json({ error: "Not authorized" });
+  }
+
+  return res.json({ user: req.user, manager: true });
 });
 
 router.post("/logout", (req, res) => {
@@ -140,6 +193,10 @@ router.post("/pin-login", async (req, res) => {
     const dbRole = normalizeRole(role);
     if (!dbRole) {
       return res.status(400).json({ error: "Role is required" });
+    }
+
+    if (dbRole === "Manager") {
+      return res.status(403).json({ error: "Manager login requires Google OAuth" });
     }
 
     // Accept either:

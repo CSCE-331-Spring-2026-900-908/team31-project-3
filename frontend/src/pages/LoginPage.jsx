@@ -32,6 +32,10 @@ const LoginPage = () => {
       ? "Manager"
       : "Unknown Role";
 
+  const handleManagerGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/auth/google?role=manager`;
+  };
+
   const handleNumberClick = (value) => {
     if (pin.length >= PIN_LENGTH) return;
     setPin((prev) => `${prev}${value}`);
@@ -49,6 +53,10 @@ const LoginPage = () => {
   const handleSubmit = async () => {
     if (!role) {
       setError("Login role is missing.");
+      return;
+    }
+    if (role === "manager") {
+      setError("Manager login uses Google sign-in.");
       return;
     }
     if (pin.length !== PIN_LENGTH || isSubmitting) return;
@@ -120,74 +128,85 @@ const LoginPage = () => {
           </p>
         ) : null}
 
-        <div
-          className="pin-dots"
-          aria-label="PIN entry"
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "10px",
-            width: "100%",
-            marginBottom: "18px",
-          }}
-        >
-          {Array.from({ length: PIN_LENGTH }).map((_, index) => (
-            <span
-              key={index}
-              className={`pin-dot ${index < pin.length ? "filled" : ""}`}
-              style={{
-                display: "inline-block",
-                width: "12px",
-                height: "12px",
-                borderRadius: "9999px",
-                border: "1px solid #9ca3af",
-                background: index < pin.length ? "#111827" : "transparent",
-                flexShrink: 0,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="pin-pad">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
-            <button
-              key={number}
-              type="button"
-              className="pin-btn"
-              onClick={() => handleNumberClick(number)}
-            >
-              {number}
+        {role === "manager" ? (
+          <>
+            <p className="pin-subtitle">Manager access uses Google sign-in.</p>
+            <button type="button" className="submit-btn" onClick={handleManagerGoogleLogin}>
+              Sign in with Google
             </button>
-          ))}
-          <button type="button" className="pin-btn alt" onClick={handleClear}>
-            Clear
-          </button>
-          <button
-            type="button"
-            className="pin-btn"
-            onClick={() => handleNumberClick(0)}
-          >
-            0
-          </button>
-          <button
-            type="button"
-            className="pin-btn alt"
-            onClick={handleBackspace}
-          >
-            Del
-          </button>
-        </div>
+          </>
+        ) : (
+          <>
+            <div
+              className="pin-dots"
+              aria-label="PIN entry"
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "10px",
+                width: "100%",
+                marginBottom: "18px",
+              }}
+            >
+              {Array.from({ length: PIN_LENGTH }).map((_, index) => (
+                <span
+                  key={index}
+                  className={`pin-dot ${index < pin.length ? "filled" : ""}`}
+                  style={{
+                    display: "inline-block",
+                    width: "12px",
+                    height: "12px",
+                    borderRadius: "9999px",
+                    border: "1px solid #9ca3af",
+                    background: index < pin.length ? "#111827" : "transparent",
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
+            </div>
 
-        <button
-          type="button"
-          className="submit-btn"
-          onClick={handleSubmit}
-          disabled={pin.length !== PIN_LENGTH || isSubmitting}
-        >
-          {isSubmitting ? "Checking..." : "Continue"}
-        </button>
+            <div className="pin-pad">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
+                <button
+                  key={number}
+                  type="button"
+                  className="pin-btn"
+                  onClick={() => handleNumberClick(number)}
+                >
+                  {number}
+                </button>
+              ))}
+              <button type="button" className="pin-btn alt" onClick={handleClear}>
+                Clear
+              </button>
+              <button
+                type="button"
+                className="pin-btn"
+                onClick={() => handleNumberClick(0)}
+              >
+                0
+              </button>
+              <button
+                type="button"
+                className="pin-btn alt"
+                onClick={handleBackspace}
+              >
+                Del
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={pin.length !== PIN_LENGTH || isSubmitting}
+            >
+              {isSubmitting ? "Checking..." : "Continue"}
+            </button>
+          </>
+        )}
 
         {error ? <p className="pin-error">{error}</p> : null}
       </div>
