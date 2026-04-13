@@ -68,6 +68,7 @@ const App = () => (
         </ManagerGate>
       }
     />
+    <Route path="/customize" element={<div />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

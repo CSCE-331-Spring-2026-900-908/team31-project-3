@@ -1,32 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 .kiosk-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
   flex: 1;
   min-height: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #f1f5f9;
+  overflow: hidden;
 }
 
 .kiosk-navbar {
   display: flex;
   gap: 8px;
-  padding: 8px 24px;
-  background: #374151;
+  padding: 12px 24px;
+  background: #ffffff;
   align-items: center;
-  border-radius: 12px;
-  margin: 0;
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 10;
 }
-
 
 .kiosk-signout-btn {
   margin-left: auto;
-  padding: 6px 14px;
-  background: none;
-  border: 1px solid #6b7280;
-  border-radius: 6px;
-  color: #9ca3af;
+  padding: 8px 16px;
+  background: #ef4444;
+  border: none;
+  border-radius: 8px;
+  color: white;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+.kiosk-signout-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
 }
 
 .kiosk-layout {
@@ -35,171 +47,550 @@
   flex: 1;
   min-height: 0;
   padding: 24px;
-  gap: 24px;
+  gap: 16px;
   box-sizing: border-box;
   min-width: 872px;
-  overflow-x: auto;
+  overflow: hidden; /* To keep scroll contained inside */
 }
 
+/* ── Topbar (Categories + Weather) ── */
+.kiosk-topbar {
+  flex: 0 0 auto;
+  align-self: stretch;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kiosk-category-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.kiosk-category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.kiosk-category-btn {
+  padding: 12px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.kiosk-category-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.kiosk-category-btn.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: white;
+}
+
+/* ── Weather Widget ── */
+.kiosk-weather-widget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.kiosk-weather-widget img {
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.kiosk-weather-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kiosk-weather-temp {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0369a1;
+  line-height: 1.1;
+}
+
+.kiosk-weather-desc {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0284c7;
+  text-transform: capitalize;
+}
+
+/* ── Main Display layout ── */
 .kiosk-display-layout {
   display: flex;
   flex-direction: row;
   flex: 1;
   min-height: 0;
-  padding: 24px;
   gap: 24px;
   box-sizing: border-box;
-  min-width: 872px;
-  overflow-x: auto;
+  position: relative;
 }
 
+/* ── Menu Section ── */
 .kiosk-menu {
   flex: 1;
-  min-width: 500px;
   overflow-y: auto;
+  padding-right: 12px;
+}
+
+.kiosk-menu::-webkit-scrollbar {
+  width: 8px;
+}
+.kiosk-menu::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
 }
 
 .kiosk-heading {
   margin: 0 0 16px;
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-family: inherit;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.5px;
 }
 
 .kiosk-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
-}
-
-.kiosk-cart {
-  flex: 0 0 300px;
-  align-self: stretch;
-  background: #fff;
-  border: 1.5px solid #111827;
-  border-radius: 12px;
-  padding: 24px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 0;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
 .kiosk-product-btn {
-  padding: 16px 8px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: inherit;
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #334155;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.kiosk-category-btn {
-  padding: 16px 8px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: inherit;
+.kiosk-product-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
+.kiosk-product-btn:active {
+  background: #f1f5f9;
+}
+
+.kiosk-product-btn.applied {
+  background: #0f172a;
+  border-color: #0f172a;
+  box-shadow: none;
+  color: white;
+}
+
+.kiosk-product-image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  margin-top: 12px;
+  border-radius: 12px;
+}
+
+.kiosk-modifier-group {
+  margin-bottom: 12px;
+}
+
+.kiosk-product-grid.modifiers {
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+/* ── Sidebar (Cart & Customization) ── */
 .kiosk-sidebar {
-  flex: 0 0 300px;
-  align-self: stretch;
-  background: #fff;
-  border: 1.5px solid #111827;
-  border-radius: 12px;
-  padding: 24px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 0;
-}
-
-.kiosk-topbar {
-  flex: 0 0 100px;
-  align-self: stretch;
-  background: #fff;
-  border: 1.5px solid #111827;
-  border-radius: 12px;
+  flex: 0 0 340px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   padding: 24px;
   display: flex;
-  justify-content: center;
-  /* grid-template-columns: auto auto auto; */
-  /* grid-template-rows: auto auto auto; */
-  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
 }
 
+/* ── Rewards Floating Overlay ── */
+.kiosk-rewards-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 8px;
+  max-height: calc(100% - 32px);
+}
+
+.kiosk-rewards-fab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #0f172a;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  transition: background 0.15s, transform 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.kiosk-rewards-fab:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.kiosk-rewards-fab.linked {
+  background: #0369a1;
+}
+
+.kiosk-rewards-fab-pts {
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.kiosk-rewards-dropdown {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  width: 280px;
+  overflow-y: auto;
+  animation: rewards-drop-in 0.15s ease;
+}
+
+@keyframes rewards-drop-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.kiosk-rewards-dropdown-section {
+  padding: 14px 16px;
+}
+
+/* ── Old pane classes (kept for customization view) ── */
+.kiosk-rewards-pane {
+  display: none;
+}
+
+.kiosk-voucher-btn {
+  width: 100%;
+  padding: 10px 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.kiosk-voucher-btn.active {
+  background: #2dd4bf;
+}
+
+.kiosk-voucher-btn:hover {
+  opacity: 0.9;
+}
+
+.kiosk-rewards-remove-btn {
+  width: 100%;
+  padding: 8px;
+  background: none;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #ef4444;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.kiosk-rewards-remove-btn:hover {
+  background: #fef2f2;
+}
+
+
 .kiosk-order-list {
+  flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-height: 0;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-right: 8px;
+}
+
+.kiosk-order-list::-webkit-scrollbar {
+  width: 6px;
+}
+.kiosk-order-list::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
 }
 
 .kiosk-order-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 12px;
-  background: #f6f7fb;
-  border-radius: 8px;
+  padding: 14px 0;
+  background: transparent;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.kiosk-subtract-btn {
-  background: red;
-  border: solid black 1px;
-  cursor: pointer;
-  color: #9ca3af;
+.kiosk-order-item.cart-item {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
 }
 
-.kiosk-add-btn {
-  background: green;
-  border: solid black 1px;
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-item-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.cart-item-price {
+  font-weight: 800;
+  color: #3b82f6;
+  font-size: 1.1rem;
+}
+
+.cart-item-modifiers {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.modifier-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.modifier-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  padding: 0;
+  margin-top: 4px;
+}
+
+.kiosk-qty-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  color: #9ca3af;
+  font-weight: 800;
+  color: #475569;
+  transition: all 0.2s;
+}
+
+.kiosk-qty-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.kiosk-qty-text {
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 14px;
+  text-align: center;
 }
 
 .kiosk-remove-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: #9ca3af;
+  color: #ef4444;
+  font-weight: 800;
+  margin-left: 4px;
+  transition: all 0.2s;
+}
+
+.kiosk-remove-btn:hover {
+  transform: scale(1.1);
+}
+
+.kiosk-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #3b82f6;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-left: 8px;
+  transition: all 0.2s;
+}
+
+.kiosk-edit-btn:hover {
+  color: #2563eb;
+  transform: scale(1.05);
+}
+
+.kiosk-empty-cart {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.6;
 }
 
 .kiosk-pinned {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  align-items: stretch;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 2px dashed #e2e8f0;
 }
 
 .kiosk-total-row {
   display: flex;
   justify-content: space-between;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: #0f172a;
 }
 
 .kiosk-submit-btn {
-  padding: 12px;
-  background: #111827;
+  padding: 16px;
+  background: #0f172a;
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1.25rem;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: none;
+}
+
+.kiosk-submit-btn:hover:not(:disabled) {
+  background: #1e293b;
+  box-shadow: none;
+}
+
+.kiosk-submit-btn:disabled {
+  background: #cbd5e1;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .kiosk-back-btn {
-  padding: 12px;
-  background: #fff;
-  color: #000;
-  border: 1px solid #e5e7eb;
+  padding: 16px;
+  background: #ffffff;
+  color: #ef4444;
+  border: 1px solid #ef4444;
   border-radius: 8px;
-  font-weight: 600;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: none;
+  width: 100%;
+}
+
+.kiosk-back-btn:hover {
+  background: #fef2f2;
+}
+
+.kiosk-email-field {
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  width: 100%;
+  font-family: inherit;
+  font-size: 1rem;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  background: #ffffff;
+}
+
+.kiosk-email-field:focus {
+  outline: none;
+  border-color: #0f172a;
+}
+
+.kiosk-apply-rewards-btn {
+  background: #0f172a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 20px;
+  font-family: inherit;
+  font-weight: 700;
   font-size: 1rem;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kiosk-apply-rewards-btn:hover {
+  background: #1e293b;
 }

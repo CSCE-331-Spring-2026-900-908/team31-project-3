@@ -243,7 +243,7 @@ const MenuEditPage = () => {
                   <th className="menu-col-name">Name</th>
                   <th className="menu-col-category">Category</th>
                   <th className="menu-col-price">Price</th>
-                  <th className="menu-col-active">Can Be Served Hot</th>
+                  <th className="menu-col-active">Hot</th>
                   <th className="menu-col-active">Active</th>
                   <th className="menu-col-actions">Actions</th>
                 </tr>
@@ -413,7 +413,7 @@ const MenuEditPage = () => {
                   />
 
                   <label className="manager-modal-label" htmlFor="add-item-served-hot">
-                    Can Be Served Hot
+                    Hot
                   </label>
                   <input
                     id="add-item-served-hot"

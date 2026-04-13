@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Manager.css";
 import "./OrdersPage.css";
 import API_BASE_URL from "../config/apiBaseUrl";
-import { getWeather } from "./WeatherAPI";
 
 const MANAGER_TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
 
@@ -12,7 +11,7 @@ const OrdersPage = ({ cashierMode = false }) => {
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [temp, setTemp] = useState(null);
+  const instanceCounter = useRef(0);
 
   // Rewards state
   const [customerEmail, setCustomerEmail] = useState("");
@@ -28,61 +27,22 @@ const OrdersPage = ({ cashierMode = false }) => {
       .catch(console.error);
   }, []);
 
-    useEffect(() => {
-        async function loadWeather() {
-            const data = await getWeather();
-            setTemp(data.temp);
-        }
-        loadWeather();
-    }, []);
-
   const grouped = useMemo(() => {
     const map = new Map();
-    const rec = "Recommended Based On Weather"
-    
-    const recArray = []
-    for(const p of products){
-      if(temp > 50 && !p.can_be_served_hot){
-        recArray.push(p);
-        continue;
-      }
-
-      else if(temp < 50 && p.can_be_served_hot){
-        recArray.push(p);
-        continue;
-      }
-    }
-
-    const shuffled = [...recArray].sort(() => 0.5 - Math.random());
-    const randomFive = shuffled.slice(0, 5);
-    map.set(rec,randomFive);
-
     for (const p of products) {
       const cat = p.category_name || "Other";
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat).push(p);
     }
-
-    return [...map.entries()].sort(([a], [b]) => {
-    if (a === rec) return -1;
-    if (b === rec) return 1;
-    return a.localeCompare(b);
-  });
-  }, [products,temp]);
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [products]);
 
   const addItem = (product) => {
-    setOrder((prev) => {
-      const existing = prev.find((i) => i.product_id === product.product_id);
-      if (existing)
-        return prev.map((i) =>
-          i.product_id === product.product_id ? { ...i, qty: i.qty + 1 } : i
-        );
-      return [...prev, { ...product, qty: 1 }];
-    });
+    setOrder((prev) => [...prev, { ...product, qty: 1, instance_id: instanceCounter.current++ }]);
   };
 
-  const removeItem = (id) =>
-    setOrder((prev) => prev.filter((i) => i.product_id !== id));
+  const removeItem = (instance_id) =>
+    setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
 
   const handleLookup = async () => {
     if (!customerEmail.trim()) return;
@@ -113,9 +73,9 @@ const OrdersPage = ({ cashierMode = false }) => {
       const orderData = await orderReq.json();
       const orderId = orderData.orderId;
 
-      // 2. Add Items
-      for (const item of order) {
-        await fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
+      // 2. Add all items in parallel
+      await Promise.all(order.map(item =>
+        fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -123,8 +83,8 @@ const OrdersPage = ({ cashierMode = false }) => {
             quantity: item.qty,
             modifiers: []
           })
-        });
-      }
+        })
+      ));
 
       // 3. Checkout
       await fetch(`${API_BASE_URL}/orders/${orderId}/checkout`, {
@@ -202,54 +162,46 @@ const OrdersPage = ({ cashierMode = false }) => {
               </button>
             ))}
           </div>
-          {grouped.filter(([cat]) => selectedCategory === "All" || cat === selectedCategory).map(([category, items]) => (
-            <div key={category} className="orders-category-section">
-              <h3 className="orders-category-heading">{category}</h3>
-              <div className="orders-product-grid">
-                {items.map((p) => (
-                  <button
-                    key={p.product_id}
-                    className="orders-product-btn"
-                    onClick={() => addItem(p)}
-                  >
-                    <div className="orders-product-img-placeholder" >
-                      {p.image_url ? (
-                        <img
-                          src={p.image_url}
-                          alt={p.name}
-                          className="orders-product-img"
-                        />
-                      ) : (<div className="orders-product-no-img">No Image</div>
-                      )}
-
-                    </div>
-                    <span className="orders-product-name">{p.name}</span>
-                    <span className="orders-product-price">
-                      ${Number(p.base_price).toFixed(2)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="orders-product-grid">
+            {grouped
+              .filter(([cat]) => selectedCategory === "All" || cat === selectedCategory)
+              .flatMap(([, items]) => items)
+              .map((p) => (
+                <button
+                  key={p.product_id}
+                  className="orders-product-btn"
+                  onClick={() => addItem(p)}
+                >
+                  <span className="orders-product-name">{p.name}</span>
+                  <span className="orders-product-price">
+                    ${Number(p.base_price).toFixed(2)}
+                  </span>
+                </button>
+              ))}
+          </div>
         </div>
 
         <div className="orders-sidebar">
           <h2 className="orders-sidebar-heading">Current Order</h2>
           <div className="orders-order-list">
             {order.map((item) => (
-              <div key={item.product_id} className="orders-order-item">
+              <div key={item.instance_id} className="orders-order-item">
                 <div className="orders-order-item-info">
                   <span className="orders-order-item-name">{item.name}</span>
-                  <span className="orders-order-item-qty">x{item.qty}</span>
                 </div>
                 <div className="orders-order-item-right">
                   <span className="orders-order-item-price">
-                    ${(item.base_price * item.qty).toFixed(2)}
+                    ${Number(item.base_price).toFixed(2)}
                   </span>
                   <button
+                    className="orders-customize-btn"
+                    onClick={() => navigate("/customize")}
+                  >
+                    Edit
+                  </button>
+                  <button
                     className="orders-remove-btn"
-                    onClick={() => removeItem(item.product_id)}
+                    onClick={() => removeItem(item.instance_id)}
                   >
                     ✕
                   </button>
