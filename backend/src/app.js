@@ -15,7 +15,16 @@ const gemniAiRouter = require("./routes/gemniAi");
 const customersRouter = require("./routes/customers");
 
 
+const isProduction = process.env.NODE_ENV === "production";
+const clientUrl = process.env.CLIENT_URL || "";
+const isCrossSiteHttps = isProduction && clientUrl.startsWith("https://");
+
 const app = express();
+
+if (isProduction) {
+  // Required for secure cookies behind proxies
+  app.set("trust proxy", 1);
+}
 
 const allowedOrigins = new Set([
   "http://localhost:5173",
@@ -54,8 +63,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: isCrossSiteHttps ? "none" : "lax",
+      secure: isCrossSiteHttps,
     },
   })
 );
