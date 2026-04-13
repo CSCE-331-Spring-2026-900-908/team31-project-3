@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "./Kiosk.css";
+import { getWeather } from "./WeatherAPI";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
+const RECOMMENDED = "Recommended Based On Weather";
 const categories = ["Milk Foam Series", "Milk Tea Series", "Creative Mix Series", "Brewed Tea Series", "Coffee Series", "Slush Series"];
 
 const Kiosk = ({ showNav = false }) => {
@@ -12,7 +14,8 @@ const Kiosk = ({ showNav = false }) => {
   const [products, setProducts] = useState([]);
   const [productModifiers, setProductModifiers] = useState([]);
   const [order, setOrder] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("Milk Tea Series");
+  const [selectedCategory, setSelectedCategory] = useState(RECOMMENDED);
+  const [temp, setTemp] = useState(null);
   let defaultModifiers = [];
   let productCounter = 0;
 
@@ -31,6 +34,22 @@ const Kiosk = ({ showNav = false }) => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    async function loadWeather() {
+      const data = await getWeather();
+      setTemp(data.temp);
+    }
+    loadWeather();
+  }, []);
+
+  const recommendedProducts = useMemo(() => {
+    const filtered = products.filter((p) =>
+      temp > 50 ? !p.can_be_served_hot : p.can_be_served_hot
+    );
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 5);
+  }, [products, temp]);
 
   const addItem = (product) => {
     setOrder((prev) => {
@@ -237,15 +256,16 @@ const Kiosk = ({ showNav = false }) => {
       </nav>
       <div className="kiosk-layout">
         <div className="kiosk-topbar">
+          <button key={RECOMMENDED} className={`kiosk-category-btn${selectedCategory === RECOMMENDED ? " active" : ""}`} onClick={() => setSelectedCategory(RECOMMENDED)}>{RECOMMENDED}</button>
           {categories.map((category) =>
-            <button key={category} className="kiosk-category-btn" onClick={() => setSelectedCategory(category)}>{category}</button>
+            <button key={category} className={`kiosk-category-btn${selectedCategory === category ? " active" : ""}`} onClick={() => setSelectedCategory(category)}>{category}</button>
           )}
         </div>
         <div className="kiosk-display-layout">
           <div className="kiosk-menu">
             <h2 className="kiosk-heading">Menu</h2>
             <div className="kiosk-product-grid">
-              {products.filter((p) => p.category_name === selectedCategory).map((p) => (
+              {(selectedCategory === RECOMMENDED ? recommendedProducts : products.filter((p) => p.category_name === selectedCategory)).map((p) => (
                 <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
                   {p.name}
                   <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
@@ -280,6 +300,19 @@ const Kiosk = ({ showNav = false }) => {
     <div className="kiosk-layout">
       {/* <div className="kiosk-display-layout"> */}
         <div className="kiosk-menu">
+          {recommendedProducts.length > 0 && (
+            <>
+              <h2 className="kiosk-heading">{RECOMMENDED}</h2>
+              <div className="kiosk-product-grid">
+                {recommendedProducts.map((p) => (
+                  <button key={`rec-${p.product_id}`} className="kiosk-product-btn" onClick={() => addItem(p)}>
+                    {p.name}
+                    <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <h2 className="kiosk-heading">Menu</h2>
           <div className="kiosk-product-grid">
             {products.map((p) => (
