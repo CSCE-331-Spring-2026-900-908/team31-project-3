@@ -36,7 +36,7 @@ const normalizeRole = (raw) => {
   return null;
 };
 
-const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+const clientUrl = process.env.CLIENT_URL || "https://team31-project3.vercel.app";
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -62,7 +62,7 @@ if (!passport._strategy("google")) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
         callbackURL:
           process.env.GOOGLE_CALLBACK_URL ||
-          "http://localhost:3001/auth/google/callback",
+          "https://api-team31-project3.vercel.app/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

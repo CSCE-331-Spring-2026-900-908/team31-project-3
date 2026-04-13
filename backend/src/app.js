@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const passport = require("passport");
+const connectPgSimple = require("connect-pg-simple");
+const pool = require("../server/db");
 
 const dbTestRouter = require("./routes/db-test");
 const employeesRouter = require("./routes/employees");
@@ -16,8 +18,6 @@ const customersRouter = require("./routes/customers");
 
 
 const isProduction = process.env.NODE_ENV === "production";
-const clientUrl = process.env.CLIENT_URL || "";
-const isCrossSiteHttps = isProduction && clientUrl.startsWith("https://");
 
 const app = express();
 
@@ -56,15 +56,25 @@ app.use(
 );
 app.use(express.json());
 
+const PgSession = connectPgSimple(session);
+
 app.use(
   session({
+    store: new PgSession({
+      pool,
+      tableName: "session",
+      createTableIfMissing: true,
+    }),
     secret: process.env.SESSION_SECRET || "dev_secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: isCrossSiteHttps ? "none" : "lax",
-      secure: isCrossSiteHttps,
+      // Cross-site cookies (frontend on different domain) need SameSite=none + Secure.
+      // In production we're always cross-site HTTPS, so force these settings.
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })
 );
