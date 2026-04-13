@@ -17,6 +17,11 @@ const customersRouter = require("./routes/customers");
 
 const app = express();
 
+if (isProduction) {
+  // Required for secure cookies behind proxies
+  app.set("trust proxy", 1);
+}
+
 const allowedOrigins = new Set([
   "http://localhost:5173",
   "http://127.0.0.1:5173",
