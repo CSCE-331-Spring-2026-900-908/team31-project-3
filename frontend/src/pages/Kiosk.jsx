@@ -108,6 +108,19 @@ const Kiosk = ({ showNav = false }) => {
     setOrder((prev) => prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.option_id !== option_id) } : item));
   };
 
+  const setModifierQty = (option_id, delta) => {
+    if (currItem === null) return;
+    setOrder((prev) => prev.map((item) => {
+      if (item.instance_id !== currItem.instance_id) return item;
+      const modIndex = item.modifiers.findIndex(m => m.option_id === option_id);
+      if (modIndex === -1) return item;
+      const newMods = [...item.modifiers];
+      newMods[modIndex].qty += delta;
+      if (newMods[modIndex].qty <= 0) newMods.splice(modIndex, 1);
+      return { ...item, modifiers: newMods };
+    }));
+  };
+
   const setQtyItem = (instance_id, delta) => {
     const item = order.find((item) => item.instance_id === instance_id);
     if (!item) return;
@@ -160,36 +173,26 @@ const Kiosk = ({ showNav = false }) => {
   };
 
   const placeOrder = async () => {
+    if (order.length === 0) return;
     try {
-      const orderReq = await fetch(`${API}/orders`, {
+      const payload = {
+        employeeId: 1,
+        customerId: linkedCustomer?.id || null,
+        redeemVoucher: redeemVoucher,
+        items: order.map(item => ({
+          productId: item.product_id,
+          quantity: item.qty,
+          modifiers: (item.modifiers || []).flatMap(m => Array(m.qty || 1).fill(m.option_id))
+        }))
+      };
+
+      const res = await fetch(`${API}/orders/bulk`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId: 1, customerId: linkedCustomer?.id })
+        body: JSON.stringify(payload)
       });
-      const orderData = await orderReq.json();
-      const orderId = orderData.orderId;
 
-      // Add all items in parallel instead of sequentially
-      await Promise.all(order.map(item =>
-        fetch(`${API}/orders/${orderId}/items`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productId: item.product_id,
-            quantity: item.qty,
-            modifiers: (item.modifiers || []).map(m => m.option_id)
-          })
-        })
-      ));
-
-      await fetch(`${API}/orders/${orderId}/checkout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          redeemVoucher: redeemVoucher,
-          customerId: linkedCustomer?.id
-        })
-      });
+      if (!res.ok) throw new Error("Bulk submission failed");
 
       setOrder([]);
       setLinkedCustomer(null);
@@ -205,7 +208,15 @@ const Kiosk = ({ showNav = false }) => {
 
   const removeItem = (instance_id) => setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
 
-  const subtotal = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
+  const itemTotal = (item) => {
+    const modCost = (item.modifiers || []).reduce(
+      (sum, m) => sum + Number(m.price_adjustment || 0) * (m.qty || 1),
+      0
+    );
+    return (Number(item.base_price) + modCost) * item.qty;
+  };
+
+  const subtotal = order.reduce((sum, i) => sum + itemTotal(i), 0);
   let discount = 0;
   if (redeemVoucher && order.length > 0) {
     const maxPrice = Math.max(...order.map(i => i.base_price));
@@ -251,16 +262,32 @@ const Kiosk = ({ showNav = false }) => {
                       const activeItem = order.find(item => item.instance_id === currItem.instance_id);
                       const applied = activeItem?.modifiers.find((i) => String(i.option_id) === String(m.option_id));
                       return (
-                        <button key={m.option_id} className={`kiosk-product-btn ${applied ? 'applied' : ''}`} onClick={() => addModifier(m)}>
-                          {m.name}
-                          {category === 'Topping' && m.image_url && (
-                            <img 
-                              src={m.image_url} 
-                              alt={m.name} 
-                              className="kiosk-product-image" 
-                            />
+                        <div key={m.option_id} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <button className={`kiosk-product-btn ${applied ? 'applied' : ''}`} onClick={() => addModifier(m)} style={{ flex: 1 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <span>{m.name}</span>
+                              {Number(m.price_adjustment) > 0 && (
+                                <span style={{ fontSize: '0.85rem', color: applied ? '#cbd5e1' : '#64748b', fontWeight: 600 }}>
+                                  +${Number(m.price_adjustment).toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                            {category === 'Topping' && m.image_url && (
+                              <img 
+                                src={m.image_url} 
+                                alt={m.name} 
+                                className="kiosk-product-image" 
+                              />
+                            )}
+                          </button>
+                          {category === 'Topping' && applied && (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '8px', background: '#e2e8f0', borderRadius: '8px' }}>
+                              <button onClick={() => setModifierQty(m.option_id, -1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }}>-</button>
+                              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>{applied.qty || 1}</span>
+                              <button onClick={() => setModifierQty(m.option_id, 1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }}>+</button>
+                            </div>
                           )}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -282,9 +309,10 @@ const Kiosk = ({ showNav = false }) => {
                   </div>
                 </div>
                 {order.find(item => item.instance_id === currItem.instance_id)?.modifiers.map((modifier) => (
-                  <div key={modifier.option_id} className="kiosk-order-item">
-                    <span className="modifier-name">{modifier.name}</span>
-                    <button className="kiosk-remove-btn" onClick={() => removeModifier(modifier.option_id)}>✕</button>
+                  <div key={modifier.option_id} className="kiosk-order-item" style={{ padding: '8px 0', borderBottom: 'none' }}>
+                    <span className="modifier-name" style={{ color: '#475569' }}>
+                      {modifier.qty > 1 ? `${modifier.qty}x ` : ''}{modifier.name} {Number(modifier.price_adjustment) > 0 ? `(+$${(Number(modifier.price_adjustment) * (modifier.qty || 1)).toFixed(2)})` : ''}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -430,11 +458,11 @@ const Kiosk = ({ showNav = false }) => {
                 <div key={item.instance_id} className="kiosk-order-item cart-item">
                   <div className="cart-item-header">
                     <span className="cart-item-name">{item.name}</span>
-                    <span className="cart-item-price">${Number(item.base_price * item.qty).toFixed(2)}</span>
+                    <span className="cart-item-price">${itemTotal(item).toFixed(2)}</span>
                   </div>
                   {item.modifiers && item.modifiers.length > 0 && (
                      <div className="cart-item-modifiers">
-                        {item.modifiers.map(m => m.name).join(", ")}
+                        {item.modifiers.map(m => `${m.qty > 1 ? `${m.qty}x ` : ''}${m.name}${Number(m.price_adjustment) > 0 ? ` (+$${(Number(m.price_adjustment) * (m.qty || 1)).toFixed(2)})` : ''}`).join(", ")}
                      </div>
                   )}
                   <div className="modifier-controls">

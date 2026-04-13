@@ -35,17 +35,17 @@
 .orders-category-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px;
   margin-top: -20px;
   margin-bottom: 0;
 }
 
 .orders-filter-btn {
-  padding: 4px 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 20px;
+  padding: 12px 20px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 24px;
   background: #fff;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
   color: #374151;
@@ -79,24 +79,26 @@
 
 .orders-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
 }
 
 .orders-product-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 10px 8px;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 10px;
   background: #fff;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   cursor: pointer;
-  font-size: inherit;
+  font-size: 0.95rem;
   text-align: center;
   transition: border-color 0.15s, box-shadow 0.15s;
-  min-height: 64px;
+  min-height: 72px;
+  height: 100%;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
@@ -152,8 +154,8 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   padding: 16px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -166,6 +168,7 @@
 }
 
 .orders-order-list {
+  flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -292,8 +295,9 @@
   padding: 16px;
   background: #f6f7fb;
   border-radius: 12px;
-  margin-top: auto;
-  margin-bottom: 20px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 .orders-rewards-heading {
   margin: 0 0 12px;
@@ -369,3 +373,579 @@
   background: #ef4444;
   color: white;
 }
+
+/* ── Customization Panel ── */
+
+.orders-customize-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.orders-customize-back-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #374151;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.orders-customize-back-btn:hover {
+  background: #e5e7eb;
+}
+
+.orders-customize-base-price {
+  margin-left: auto;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.orders-customize-drink-qty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #f6f7fb;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.orders-customize-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ── Qty controls (shared: drink qty + topping qty) ── */
+
+.orders-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.orders-qty-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s;
+  padding: 0;
+}
+.orders-qty-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+.orders-qty-btn.small {
+  width: 24px;
+  height: 24px;
+  font-size: 0.95rem;
+  border-radius: 4px;
+}
+
+.orders-qty-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* ── Scrollable modifier sections ── */
+
+.orders-customize-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-right: 2px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.orders-customize-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.orders-customize-cat-heading {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.orders-customize-cat-hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #9ca3af;
+}
+
+/* ── Single-select (radio) options ── */
+
+.radio-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.orders-radio-option {
+  padding: 6px 12px;
+  background: #fff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+.orders-radio-option:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+.orders-radio-option.selected {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+/* ── Topping cards (multi-select with qty) ── */
+
+.topping-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.orders-topping-card {
+  background: #fff;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.12s;
+}
+.orders-topping-card.selected {
+  border-color: #111827;
+  background: #f8fafc;
+}
+
+.orders-topping-name-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.orders-topping-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.orders-modifier-price {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+.orders-radio-option.selected .orders-modifier-price {
+  color: #d1d5db;
+}
+
+.orders-topping-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 12px 8px;
+  border-top: 1px solid #e5e7eb;
+  background: #f6f7fb;
+}
+
+/* ── Order item modifier tags ── */
+
+.orders-order-item-mods {
+  font-size: 0.75rem;
+  color: #6b7280;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.orders-order-item-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ── Remove item button in customize panel ── */
+
+.orders-remove-item-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: #ef4444;
+  border: 1.5px solid #ef4444;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.orders-remove-item-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* ════════════════════════════════
+   Customization Modal
+════════════════════════════════ */
+
+.orders-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1500;
+  padding: 20px;
+}
+
+.orders-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.25);
+  width: min(1000px, 100%);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Modal header ── */
+.orders-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1.5px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.orders-modal-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.orders-modal-title {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.orders-modal-base-price {
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.orders-modal-close-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid #e5e7eb;
+  background: #f3f4f6;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.orders-modal-close-btn:hover {
+  background: #e5e7eb;
+}
+
+/* ── Quantity row ── */
+.orders-modal-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #f6f7fb;
+  border-bottom: 1.5px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.orders-modal-qty-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.orders-modal-qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.orders-modal-qty-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, border-color 0.12s;
+}
+.orders-modal-qty-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.orders-modal-qty-value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #111827;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* ── Scrollable body ── */
+.orders-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+.orders-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orders-modal-cat-heading {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orders-modal-cat-hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #9ca3af;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Single-select radio grid ── */
+.orders-modal-radio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.orders-modal-radio-btn {
+  padding: 12px 14px;
+  background: #fff;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  min-height: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+.orders-modal-radio-btn:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
+}
+.orders-modal-radio-btn.selected {
+  background: #111827;
+  border-color: #111827;
+  color: #fff;
+}
+
+/* ── Topping grid ── */
+.orders-modal-topping-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.orders-modal-topping-card {
+  background: #fff;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.12s;
+}
+.orders-modal-topping-card.selected {
+  border-color: #111827;
+  background: #f8fafc;
+}
+
+.orders-modal-topping-btn {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 8px;
+}
+
+.orders-modal-topping-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.orders-modal-mod-price {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  white-space: nowrap;
+}
+.orders-modal-radio-btn.selected .orders-modal-mod-price {
+  color: #9ca3af;
+}
+
+.orders-modal-topping-qty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px 10px;
+  border-top: 1px solid #e5e7eb;
+  background: #f6f7fb;
+}
+
+/* ── Modal footer ── */
+.orders-modal-footer {
+  border-top: 1.5px solid #e5e7eb;
+  padding: 16px 24px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.orders-modal-item-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.orders-modal-footer-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.orders-modal-remove-btn {
+  flex: 1;
+  padding: 14px;
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid #ef4444;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  min-height: 52px;
+  transition: all 0.15s;
+}
+.orders-modal-remove-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.orders-modal-confirm-btn {
+  flex: 2;
+  padding: 14px;
+  background: #111827;
+  color: #fff;
+  border: 2px solid #111827;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  min-height: 52px;
+  transition: background 0.15s;
+}
+.orders-modal-confirm-btn:hover {
+  background: #1f2937;
+}
+
+

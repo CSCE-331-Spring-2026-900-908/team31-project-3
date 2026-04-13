@@ -406,4 +406,139 @@ router.post("/:orderId/checkout", async (req, res) => {
   }
 });
 
+router.post("/bulk", async (req, res) => {
+  const { employeeId, customerId, redeemVoucher, items } = req.body || {};
+  const authCustomerId = req.user?.id || customerId || null;
+
+  if (!Array.isArray(items)) {
+    return res.status(400).json({ error: "items must be an array" });
+  }
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    // 1. Create Order
+    const orderRes = await client.query(
+      "INSERT INTO \"order\" (employee_id, customer_id, created_at, total_tax, total_final) VALUES ($1, $2, NOW(), 0, 0) RETURNING id;",
+      [employeeId || null, authCustomerId]
+    );
+    const orderId = orderRes.rows[0].id;
+
+    // 2. Insert Items
+    for (const item of items) {
+      const productId = Number(item.productId);
+      const qty = Math.max(Number(item.quantity || 1), 1);
+      const modifiersInfo = Array.isArray(item.modifiers) ? item.modifiers : [];
+      const notes = item.notes || null;
+
+      const productResult = await client.query(
+        "SELECT product_id, base_price, name FROM product WHERE product_id = $1;",
+        [productId]
+      );
+      if (productResult.rowCount === 0) continue;
+      const product = productResult.rows[0];
+
+      // fetch allowed modifiers
+      const allowedModifiersDB = await fetchAllowedModifiers(client, productId, modifiersInfo);
+
+      for (let i = 0; i < qty; i++) {
+        const detailResult = await client.query(
+          "INSERT INTO orderdetail (order_id, product_id, sold_price, snapshot_name, notes) VALUES ($1, $2, $3, $4, $5) RETURNING id;",
+          [orderId, productId, product.base_price, product.name, notes]
+        );
+        const detailId = detailResult.rows[0].id;
+
+        // Ensure duplicates like [2, 2] are properly mapped into multiple ordermodifier rows
+        for (const reqModId of modifiersInfo) {
+          const mod = allowedModifiersDB.find(m => m.option_id === Number(reqModId));
+          if (mod) {
+            await client.query(
+              "INSERT INTO ordermodifier (order_detail_id, modifier_option_id, price_charged, snapshot_name) VALUES ($1, $2, $3, $4);",
+              [detailId, mod.option_id, mod.price_adjustment, mod.name]
+            );
+          }
+        }
+      }
+    }
+
+    // 3. Inventory Deductions
+    await client.query(
+      "UPDATE inventory SET quantity = quantity - subq.total_used " +
+        "FROM (SELECT pi.item_id, SUM(pi.quantity_used) AS total_used " +
+        "FROM orderdetail od JOIN productingredient pi ON od.product_id = pi.product_id " +
+        "WHERE od.order_id = $1 GROUP BY pi.item_id) subq " +
+        "WHERE inventory.item_id = subq.item_id;",
+      [orderId]
+    );
+
+    await client.query(
+      "UPDATE inventory SET quantity = quantity - subq.total_used " +
+        "FROM (SELECT mo.inventory_item_id AS item_id, COUNT(*) AS total_used " +
+        "FROM ordermodifier om JOIN orderdetail od ON om.order_detail_id = od.id " +
+        "JOIN modifieroption mo ON om.modifier_option_id = mo.option_id " +
+        "WHERE od.order_id = $1 AND mo.inventory_item_id IS NOT NULL " +
+        "GROUP BY mo.inventory_item_id) subq " +
+        "WHERE inventory.item_id = subq.item_id;",
+      [orderId]
+    );
+
+    // 4. Calculate Totals
+    let totals = await recalcOrderTotals(client, orderId);
+
+    // 5. Points & Vouchers
+    let customerRow = null;
+    if (authCustomerId) {
+      const custRes = await client.query("SELECT * FROM customer WHERE id = $1;", [authCustomerId]);
+      if (custRes.rowCount > 0) {
+        customerRow = custRes.rows[0];
+      }
+    }
+
+    let appliedDiscount = 0;
+    if (redeemVoucher && customerRow && customerRow.points >= 65) {
+      const expensiveRes = await client.query(
+        "SELECT MAX(od.sold_price + COALESCE(mods.mod_total, 0)) AS max_price " +
+        "FROM orderdetail od " +
+        "LEFT JOIN (SELECT order_detail_id, SUM(price_charged) AS mod_total FROM ordermodifier GROUP BY order_detail_id) mods " +
+        "ON od.id = mods.order_detail_id " +
+        "WHERE od.order_id = $1;",
+        [orderId]
+      );
+      
+      const maxPrice = Number(expensiveRes.rows[0].max_price || 0);
+      if (maxPrice > 0) {
+        appliedDiscount = maxPrice;
+        const newSubtotal = Math.max(0, totals.subtotal - appliedDiscount);
+        const newTax = roundMoney(newSubtotal * TAX_RATE);
+        const newTotal = roundMoney(newSubtotal + newTax);
+        
+        await client.query(
+          "UPDATE \"order\" SET total_tax = $1, total_final = $2 WHERE id = $3;",
+          [newTax, newTotal, orderId]
+        );
+        totals = { subtotal: newSubtotal, tax: newTax, total: newTotal, discount: appliedDiscount };
+        await client.query("UPDATE customer SET points = points - 65 WHERE id = $1;", [authCustomerId]);
+        customerRow.points -= 65;
+      }
+    }
+
+    if (customerRow) {
+      const earnedPoints = Math.floor(totals.total);
+      if (earnedPoints > 0) {
+        await client.query("UPDATE customer SET points = points + $1 WHERE id = $2;", [earnedPoints, authCustomerId]);
+      }
+    }
+
+    await client.query("COMMIT");
+    res.status(201).json({ orderId, totals });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
