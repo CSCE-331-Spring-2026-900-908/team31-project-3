@@ -15,6 +15,10 @@ const gemniAiRouter = require("./routes/gemniAi");
 const customersRouter = require("./routes/customers");
 
 
+const isProduction = process.env.NODE_ENV === "production";
+const clientUrl = process.env.CLIENT_URL || "";
+const isCrossSiteHttps = isProduction && clientUrl.startsWith("https://");
+
 const app = express();
 
 if (isProduction) {
@@ -51,10 +55,6 @@ app.use(
   })
 );
 app.use(express.json());
-
-const isProduction = process.env.NODE_ENV === "production";
-const clientUrl = process.env.CLIENT_URL || "";
-const isCrossSiteHttps = isProduction && clientUrl.startsWith("https://");
 
 app.use(
   session({
