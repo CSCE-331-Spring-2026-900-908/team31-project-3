@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Manager.css";
 import "./OrdersPage.css";
@@ -11,6 +11,7 @@ const OrdersPage = ({ cashierMode = false }) => {
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const instanceCounter = useRef(0);
 
   // Rewards state
   const [customerEmail, setCustomerEmail] = useState("");
@@ -37,18 +38,11 @@ const OrdersPage = ({ cashierMode = false }) => {
   }, [products]);
 
   const addItem = (product) => {
-    setOrder((prev) => {
-      const existing = prev.find((i) => i.product_id === product.product_id);
-      if (existing)
-        return prev.map((i) =>
-          i.product_id === product.product_id ? { ...i, qty: i.qty + 1 } : i
-        );
-      return [...prev, { ...product, qty: 1 }];
-    });
+    setOrder((prev) => [...prev, { ...product, qty: 1, instance_id: instanceCounter.current++ }]);
   };
 
-  const removeItem = (id) =>
-    setOrder((prev) => prev.filter((i) => i.product_id !== id));
+  const removeItem = (instance_id) =>
+    setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
 
   const handleLookup = async () => {
     if (!customerEmail.trim()) return;
@@ -193,18 +187,23 @@ const OrdersPage = ({ cashierMode = false }) => {
           <h2 className="orders-sidebar-heading">Current Order</h2>
           <div className="orders-order-list">
             {order.map((item) => (
-              <div key={item.product_id} className="orders-order-item">
+              <div key={item.instance_id} className="orders-order-item">
                 <div className="orders-order-item-info">
                   <span className="orders-order-item-name">{item.name}</span>
-                  <span className="orders-order-item-qty">x{item.qty}</span>
                 </div>
                 <div className="orders-order-item-right">
                   <span className="orders-order-item-price">
-                    ${(item.base_price * item.qty).toFixed(2)}
+                    ${Number(item.base_price).toFixed(2)}
                   </span>
                   <button
+                    className="orders-customize-btn"
+                    onClick={() => navigate("/customize")}
+                  >
+                    Edit
+                  </button>
+                  <button
                     className="orders-remove-btn"
-                    onClick={() => removeItem(item.product_id)}
+                    onClick={() => removeItem(item.instance_id)}
                   >
                     ✕
                   </button>
