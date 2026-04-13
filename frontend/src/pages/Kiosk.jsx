@@ -2,8 +2,9 @@ import { useState, useEffect, useMemo } from "react";
 import "./Kiosk.css";
 import { getWeather } from "./WeatherAPI";
 import Chatbot from "./Chatbot";
+import API_BASE_URL from "../config/apiBaseUrl";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
+const API = API_BASE_URL;
 
 const RECOMMENDED = "Recommended Based On Weather";
 const categories = ["Milk Foam Series", "Milk Tea Series", "Creative Mix Series", "Brewed Tea Series", "Coffee Series", "Slush Series"];
