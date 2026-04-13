@@ -47,6 +47,10 @@ app.use(
 );
 app.use(express.json());
 
+const isProduction = process.env.NODE_ENV === "production";
+const clientUrl = process.env.CLIENT_URL || "";
+const isCrossSiteHttps = isProduction && clientUrl.startsWith("https://");
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev_secret",
@@ -54,8 +58,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: isCrossSiteHttps ? "none" : "lax",
+      secure: isCrossSiteHttps,
     },
   })
 );
