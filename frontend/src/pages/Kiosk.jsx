@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import "./Kiosk.css";
 import { getWeather } from "./WeatherAPI";
+import Chatbot from "./Chatbot";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -9,13 +10,17 @@ const categories = ["Milk Foam Series", "Milk Tea Series", "Creative Mix Series"
 
 const Kiosk = ({ showNav = false }) => {
   const [customizing, setCustomizing] = useState(false);
-  const [viewCart, setViewCart] = useState(false);
   const [currItem, setCurrItem] = useState(null);
   const [products, setProducts] = useState([]);
   const [productModifiers, setProductModifiers] = useState([]);
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(RECOMMENDED);
-  const [temp, setTemp] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
+  const [rewardsEmail, setRewardsEmail] = useState("");
+  const [linkedCustomer, setLinkedCustomer] = useState(null);
+  const [redeemVoucher, setRedeemVoucher] = useState(false);
+  const [lookupMessage, setLookupMessage] = useState("");
+  const [rewardsOpen, setRewardsOpen] = useState(false);
   let defaultModifiers = [];
   let productCounter = 0;
 
@@ -28,41 +33,46 @@ const Kiosk = ({ showNav = false }) => {
       .then((r) => r.json())
       .then((data) => setProductModifiers(Array.isArray(data) ? data : []))
       .catch(console.error);
-    for(const modifier of productModifiers) {
-      if(modifier.is_default) {
-        defaultModifiers.push({ ...modifier, qty: 1 });
-      }
-    }
   }, []);
 
   useEffect(() => {
+    // Collect default modifiers after fetch automatically or in a cleaner way, but here it's fine
+    // Since we depend on productModifiers, it'll populate when productModifiers loads.
+    // However, productCounter should strictly be handled better, but we'll adapt existing logic.
+  }, [productModifiers]);
+
+  useEffect(() => {
     async function loadWeather() {
-      const data = await getWeather();
-      setTemp(data.temp);
+      try {
+        const data = await getWeather();
+        setWeatherData(data);
+      } catch (err) {
+        console.error("Failed to load weather", err);
+      }
     }
     loadWeather();
   }, []);
 
   const recommendedProducts = useMemo(() => {
+    const tmp = weatherData?.temp ?? 70;
     const filtered = products.filter((p) =>
-      temp > 50 ? !p.can_be_served_hot : p.can_be_served_hot
+      tmp > 50 ? !p.can_be_served_hot : p.can_be_served_hot
     );
     const shuffled = [...filtered].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 5);
-  }, [products, temp]);
+  }, [products, weatherData]);
 
   const addItem = (product) => {
-    setOrder((prev) => {
-      setCustomizing(true);
-      const newItem = { ...product, modifiers: structuredClone(defaultModifiers), qty: 1, instance_id: productCounter++ };
-      setCurrItem(newItem);
-      // const existing = prev.find((i) => i.product_id === product.product_id);
-      // if (existing) return prev.map((i) => i.product_id === product.product_id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, newItem];
-    });
+    const defaults = productModifiers.filter(m => m.is_default).map(m => ({ ...m, qty: 1 }));
+    const instance_id = Date.now() + Math.random();
+    const newItem = { ...product, modifiers: defaults, qty: 1, instance_id };
+    
+    setOrder((prev) => [...prev, newItem]);
+    setCurrItem(newItem);
+    setCustomizing(true);
   };
 
-  const customizeItem = (item) => {
+  const editItem = (item) => {
     setCurrItem(item);
     setCustomizing(true);
   };
@@ -72,278 +82,410 @@ const Kiosk = ({ showNav = false }) => {
     setCustomizing(false);
   };
 
-  const toCart = () => {
-    setCurrItem(null);
-    setCustomizing(false);
-    setViewCart(true);
-  };
-
-  const addModifier = (modifier, exclusive) => {
-    if(currItem === null) {
-      return;
-    }
+  const addModifier = (modifier) => {
+    if (currItem === null) return;
     setOrder((prev) => {
-      if (exclusive) return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.category !== modifier.category).concat({ ...modifier, qty: 1 }) } : item);
-      const existing = prev.find((i) => i.instance_id === currItem.instance_id)?.modifiers.find((m) => m.option_id === modifier.option_id);
-      if (existing) return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.map((m) => m.option_id === modifier.option_id ? { ...m, qty: m.qty + 1 } : m) } : item);
-      // return [...prev, { ...item, modifiers: [...item.modifiers, { ...modifier, qty: 1 }] }];
-      return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: [...item.modifiers, { ...modifier, qty: 1 }] } : item);
+      const isTopping = modifier.category === "Topping";
+      return prev.map((item) => {
+        if (item.instance_id !== currItem.instance_id) return item;
+        let newModifiers = [...item.modifiers];
+        if (isTopping) {
+          const existingId = newModifiers.findIndex(m => m.option_id === modifier.option_id);
+          if (existingId >= 0) newModifiers.splice(existingId, 1);
+          else newModifiers.push({ ...modifier, qty: 1 });
+        } else {
+          newModifiers = newModifiers.filter(m => m.category !== modifier.category);
+          newModifiers.push({ ...modifier, qty: 1 });
+        }
+        return { ...item, modifiers: newModifiers };
+      });
     });
   };
 
   const removeModifier = (option_id) => {
-    if(currItem === null) {
-      return;
-    }
-    setOrder((prev) => {
-      return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.option_id !== option_id) } : item);
-    });
-  };
-
-  const setQtyModifier = (option_id, delta) => {
-    if(currItem === null) {
-      return;
-    }
-    if(order.find((item) => item.instance_id === currItem.instance_id).modifiers.find((m) => m.option_id === option_id && m.qty + delta <= 0)) {
-      // removeModifier({ option_id });
-      setOrder((prev) => {
-        return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.option_id !== option_id) } : item);
-      });
-      // return;
-    }
-    setOrder((prev) => {
-      return prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.map((i) => i.option_id === option_id ? { ...i, qty: Math.max(i.qty + delta, 0) } : i) } : item);
-    });
+    if (currItem === null) return;
+    setOrder((prev) => prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.option_id !== option_id) } : item));
   };
 
   const setQtyItem = (instance_id, delta) => {
-    if(order.find((item) => item.instance_id === instance_id).qty + delta <= 0) {
-      // removeItem({ instance_id });
+    const item = order.find((item) => item.instance_id === instance_id);
+    if (!item) return;
+    if (item.qty + delta <= 0) {
       setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
       return;
     }
-    setOrder((prev) => {
-      return prev.map((item) => item.instance_id === instance_id ? { ...item, qty: Math.max(item.qty + delta, 0) } : item);
-    });
+    setOrder((prev) => prev.map((i) => i.instance_id === instance_id ? { ...i, qty: i.qty + delta } : i));
   };
 
-  const placeOrder = () => {
-    const orderData = { employee_id: 1, created_at: new Date(), total_tax: 0, total_final: 0 };
-    const [orderID, setOrderID] = useState([]);
-    fetch(`${API}/orders`)
-      .then((r) => r.json())
-      .then((data) => setOrderID(data))
-      .catch(console.error);
-    for(let i = 0; i < order.length; i++) {
-      fetch(`${API}/orders/${orderID}`).then();
+  const scrollToCategory = (category) => {
+    setSelectedCategory(category);
+    const element = document.getElementById(`category-${category.replace(/\s+/g, '-')}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  // Helper: Proxies external image URLs locally to bypass hotlink protection
+  const getProxiedImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http')) {
+      return `${API}/proxy-image?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+  };
+
+  const handleLookup = async () => {
+    if (!rewardsEmail.trim()) return;
+    try {
+      const res = await fetch(`${API}/customers/lookup?email=${encodeURIComponent(rewardsEmail)}`);
+      if (!res.ok) {
+        setLookupMessage("Customer not found.");
+        setLinkedCustomer(null);
+        setRedeemVoucher(false);
+        return;
+      }
+      const data = await res.json();
+      setLinkedCustomer(data);
+      if (data.points >= 65) {
+        setRedeemVoucher(true);
+        setLookupMessage(`Found! ${data.name} (${data.points} pts). Free Drink Applied!`);
+      } else {
+        setRedeemVoucher(false);
+        setLookupMessage(`Found! ${data.name} (${data.points} pts). 65 needed for free drink.`);
+      }
+    } catch (err) {
+      setLookupMessage("Error looking up account.");
+    }
+  };
+
+  const placeOrder = async () => {
+    try {
+      const orderReq = await fetch(`${API}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employeeId: 1, customerId: linkedCustomer?.id })
+      });
+      const orderData = await orderReq.json();
+      const orderId = orderData.orderId;
+
+      // Add all items in parallel instead of sequentially
+      await Promise.all(order.map(item =>
+        fetch(`${API}/orders/${orderId}/items`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productId: item.product_id,
+            quantity: item.qty,
+            modifiers: (item.modifiers || []).map(m => m.option_id)
+          })
+        })
+      ));
+
+      await fetch(`${API}/orders/${orderId}/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          redeemVoucher: redeemVoucher,
+          customerId: linkedCustomer?.id
+        })
+      });
+
+      setOrder([]);
+      setLinkedCustomer(null);
+      setRewardsEmail("");
+      setRedeemVoucher(false);
+      setLookupMessage("");
+      setRewardsOpen(false);
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting order.");
     }
   };
 
   const removeItem = (instance_id) => setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
 
-  const total = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
+  const subtotal = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
+  let discount = 0;
+  if (redeemVoucher && order.length > 0) {
+    const maxPrice = Math.max(...order.map(i => i.base_price));
+    discount = maxPrice;
+  }
+  const tax = Math.max(0, (subtotal - discount) * 0.0825);
+  const total = Math.max(0, subtotal - discount) + tax;
 
+  // Weather Widget Component
+  const WeatherWidget = () => (
+    weatherData && (
+      <div className="kiosk-weather-widget">
+        <img src={weatherData.icon} alt="Weather icon" />
+        <div className="kiosk-weather-info">
+          <span className="kiosk-weather-temp">{weatherData.temp}°F</span>
+          <span className="kiosk-weather-desc">{weatherData.description}</span>
+        </div>
+      </div>
+    )
+  );
+
+  // Render customization screen
   if (customizing && currItem) {
     return (
       <div className="kiosk-page">
-        <nav className="kiosk-navbar">
-          <button className="kiosk-signout-btn">Sign Out</button>
-        </nav>
-        <div className="kiosk-layout">
+        {showNav && (
+          <nav className="kiosk-navbar">
+            <button className="kiosk-signout-btn">Sign Out</button>
+          </nav>
+        )}
+        <div className="kiosk-layout customizing">
           <div className="kiosk-topbar">
-            <h2 className="kiosk-heading">{currItem.name}</h2>
+            <h2 className="kiosk-heading">Customizing: {currItem.name}</h2>
+            <WeatherWidget />
           </div>
-        <div className="kiosk-display-layout">
+          <div className="kiosk-display-layout">
             <div className="kiosk-menu">
-              <h2 className="kiosk-heading">Toppings</h2>
-              <div className="kiosk-product-grid">
-                {productModifiers.filter((m) => m.category === "Topping").map((m) => (
-                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                    {m.name} {currItem.modifiers.find((i) => i.option_id === m.option_id) ? `(${currItem.modifiers.find((i) => i.option_id === m.option_id).qty})` : ""}
-                  </button>
-                ))}
-              </div>
-              <h2 className="kiosk-heading">Ice Level</h2>
-              <div className="kiosk-product-grid">
-                {productModifiers.filter((m) => m.category === "Ice Level").map((m) => (
-                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                    {m.name}
-                  </button>
-                ))}
-              </div>
-              <h2 className="kiosk-heading">Sugar Level</h2>
-              <div className="kiosk-product-grid">
-                {productModifiers.filter((m) => m.category === "Sugar Level").map((m) => (
-                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                    {m.name}
-                  </button>
-                ))}
-              </div>
-              <h2 className="kiosk-heading">Size</h2>
-              <div className="kiosk-product-grid">
-                {productModifiers.filter((m) => m.category === "Size").map((m) => (
-                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                    {m.name}
-                  </button>
-                ))}
-              </div>
-              <h2 className="kiosk-heading">Milk Type</h2>
-              <div className="kiosk-product-grid">
-                {productModifiers.filter((m) => m.category === "Milk Type").map((m) => (
-                  <button key={m.option_id} className="kiosk-product-btn" onClick={() => addModifier(m)}>
-                    {m.name}
-                  </button>
-                ))}
-              </div>
+              {['Topping', 'Ice Level', 'Sugar Level', 'Size', 'Milk Type'].map(category => (
+                <div key={category} className="kiosk-modifier-group">
+                  <h2 className="kiosk-heading">{category}s</h2>
+                  <div className="kiosk-product-grid modifiers">
+                    {productModifiers.filter((m) => m.category === category).map((m) => {
+                      const activeItem = order.find(item => item.instance_id === currItem.instance_id);
+                      const applied = activeItem?.modifiers.find((i) => String(i.option_id) === String(m.option_id));
+                      return (
+                        <button key={m.option_id} className={`kiosk-product-btn ${applied ? 'applied' : ''}`} onClick={() => addModifier(m)}>
+                          {m.name}
+                          {category === 'Topping' && m.image_url && (
+                            <img 
+                              src={m.image_url} 
+                              alt={m.name} 
+                              className="kiosk-product-image" 
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="kiosk-sidebar">
-              <h2 className="kiosk-heading">{currItem.name}</h2>
+            <div className="kiosk-sidebar customize-sidebar">
+              <h2 className="kiosk-heading">{currItem.name} Details</h2>
               <div className="kiosk-order-list">
+                <div className="kiosk-order-item cart-item" style={{ marginBottom: '16px' }}>
+                  <div className="cart-item-header">
+                    <span className="cart-item-name">Drink Quantity</span>
+                  </div>
+                  <div className="modifier-controls">
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(currItem.instance_id, -1)}>-</button>
+                    <span className="kiosk-qty-text">{order.find(item => item.instance_id === currItem.instance_id)?.qty || 1}</span>
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(currItem.instance_id, 1)}>+</button>
+                  </div>
+                </div>
                 {order.find(item => item.instance_id === currItem.instance_id)?.modifiers.map((modifier) => (
                   <div key={modifier.option_id} className="kiosk-order-item">
-                    <span>{modifier.name}</span>
-                    <button className="kiosk-subtract-btn" onClick={() => setQtyModifier(modifier.option_id, -1)}>-</button>
-                    <span>{modifier.qty}</span>
-                    <button className="kiosk-add-btn" onClick={() => setQtyModifier(modifier.option_id, 1)}>+</button>
+                    <span className="modifier-name">{modifier.name}</span>
                     <button className="kiosk-remove-btn" onClick={() => removeModifier(modifier.option_id)}>✕</button>
                   </div>
                 ))}
               </div>
-              <button className="kiosk-back-btn" onClick={() => endCustomization()}>Back to Menu</button>
+              <button className="kiosk-submit-btn" onClick={() => endCustomization()} style={{ marginBottom: '8px' }}>Done Customizing</button>
+              <button className="kiosk-back-btn" onClick={() => { removeItem(currItem.instance_id); endCustomization(); }}>Cancel Item</button>
             </div>
           </div>
         </div>
+        <Chatbot />
       </div>
-    )
-  } else if (viewCart) {
-    return (
-      <div className="kiosk-page">
+    );
+  }
+
+  // Main menu view
+  return (
+    <div className="kiosk-page">
+      {showNav && (
         <nav className="kiosk-navbar">
           <button className="kiosk-signout-btn">Sign Out</button>
         </nav>
-        <div className="kiosk-layout">
-          <div className="kiosk-topbar">
-            <button className="kiosk-category-btn" onClick={() => setViewCart(false)}>Back to Menu</button>
-          </div>
-          <div className="kiosk-menu">
-            <h2 className="kiosk-heading">Cart</h2>
-            <div className="kiosk-cart">
-              {order.map((item) => (
-                <div key={item.product_id} className="kiosk-order-item">
-                  <span>{item.name}</span>
-                  <button className="kiosk-subtract-btn" onClick={() => setQtyItem(item.instance_id, -1)}>-</button>
-                  <span>{item.qty}</span>
-                  <button className="kiosk-add-btn" onClick={() => setQtyItem(item.instance_id, 1)}>+</button>
-                  <button className="kiosk-remove-btn" onClick={() => customizeItem(item)}>EDIT</button>
-                  <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)}>REMOVE</button>
-                </div>
-              ))}
-            </div>
-            <button className="kiosk-submit-btn" disabled={order.length === 0} onClick={() => { alert("Order submitted!"); setOrder([]); }}>
-              Submit Order
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return showNav ? (
-    <div className="kiosk-page">
-      <nav className="kiosk-navbar">
-        <button className="kiosk-signout-btn">Sign Out</button>
-      </nav>
+      )}
       <div className="kiosk-layout">
         <div className="kiosk-topbar">
-          <button key={RECOMMENDED} className={`kiosk-category-btn${selectedCategory === RECOMMENDED ? " active" : ""}`} onClick={() => setSelectedCategory(RECOMMENDED)}>{RECOMMENDED}</button>
-          {categories.map((category) =>
-            <button key={category} className={`kiosk-category-btn${selectedCategory === category ? " active" : ""}`} onClick={() => setSelectedCategory(category)}>{category}</button>
-          )}
+          <div className="kiosk-category-scroll">
+            <button key={RECOMMENDED} className={`kiosk-category-btn${selectedCategory === RECOMMENDED ? " active" : ""}`} onClick={() => scrollToCategory(RECOMMENDED)}>{RECOMMENDED}</button>
+            {categories.map((category) =>
+              <button key={category} className={`kiosk-category-btn${selectedCategory === category ? " active" : ""}`} onClick={() => scrollToCategory(category)}>{category}</button>
+            )}
+          </div>
+          <WeatherWidget />
         </div>
         <div className="kiosk-display-layout">
-          <div className="kiosk-menu">
-            <h2 className="kiosk-heading">Menu</h2>
-            <div className="kiosk-product-grid">
-              {(selectedCategory === RECOMMENDED ? recommendedProducts : products.filter((p) => p.category_name === selectedCategory)).map((p) => (
-                <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
-                  {p.name}
-                  <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
-                </button>
-              ))}
-            </div>
+          <div className="kiosk-menu" style={{ scrollBehavior: 'smooth' }}>
+            {recommendedProducts.length > 0 && (
+              <div id={`category-${RECOMMENDED.replace(/\s+/g, '-')}`} style={{ scrollMarginTop: '24px' }}>
+                <h2 className="kiosk-heading">{RECOMMENDED}</h2>
+                <div className="kiosk-product-grid">
+                  {recommendedProducts.map((p) => (
+                    <button key={`rec-${p.product_id}`} className="kiosk-product-btn" onClick={() => addItem(p)}>
+                      {p.name}
+                      <img 
+                        src={p.image_url} 
+                        alt={p.name} 
+                        className="kiosk-product-image" 
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {categories.map(category => {
+              const catProducts = products.filter((p) => p.category_name === category);
+              if (catProducts.length === 0) return null;
+              return (
+                <div key={category} id={`category-${category.replace(/\s+/g, '-')}`} style={{ scrollMarginTop: '24px' }}>
+                  <h2 className="kiosk-heading">{category}</h2>
+                  <div className="kiosk-product-grid">
+                    {catProducts.map((p) => (
+                      <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
+                        {p.name}
+                        <img 
+                          src={getProxiedImageUrl(p.image_url)} 
+                          alt={p.name} 
+                          className="kiosk-product-image" 
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f8fafc' rx='12'/><text x='50' y='50' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='11' font-weight='600' fill='%2394a3b8'>NO IMAGE</text></svg>";
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* <div className="kiosk-sidebar">
-            <h2 className="kiosk-heading">Current Order</h2>
+          {/* ── Rewards Floating Overlay ── */}
+          <div className="kiosk-rewards-overlay">
+            {/* Toggle button — always visible */}
+            <button
+              className={`kiosk-rewards-fab${linkedCustomer ? ' linked' : ''}`}
+              onClick={() => setRewardsOpen(o => !o)}
+            >
+              🎁 {linkedCustomer ? linkedCustomer.name.split(' ')[0] : 'Rewards'}
+              {linkedCustomer && (
+                <span className="kiosk-rewards-fab-pts">
+                  {redeemVoucher ? `${linkedCustomer.points - 65} pts` : `${linkedCustomer.points} pts`}
+                </span>
+              )}
+            </button>
+
+            {/* Dropdown panel */}
+            {rewardsOpen && (
+              <div className="kiosk-rewards-dropdown">
+                <div className="kiosk-rewards-dropdown-section">
+                  <input
+                    type="email"
+                    placeholder="Enter rewards email..."
+                    value={rewardsEmail}
+                    onChange={(e) => setRewardsEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
+                    className="kiosk-email-field"
+                    style={{ marginBottom: '8px' }}
+                    autoFocus
+                  />
+                  <button onClick={handleLookup} className="kiosk-apply-rewards-btn" style={{ width: '100%' }}>Look Up</button>
+                  {lookupMessage && (
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '8px', textAlign: 'center', lineHeight: 1.4 }}>{lookupMessage}</div>
+                  )}
+                </div>
+                {linkedCustomer && (
+                  <div className="kiosk-rewards-dropdown-section" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a', marginBottom: '4px' }}>{linkedCustomer.name}</div>
+                    <div style={{ fontSize: '0.88rem', color: '#475569', fontWeight: 600, marginBottom: '10px' }}>
+                      {redeemVoucher
+                        ? <><span style={{ textDecoration: 'line-through', opacity: 0.5, marginRight: '4px' }}>{linkedCustomer.points}</span><span style={{ color: '#ef4444', fontWeight: 800 }}>{linkedCustomer.points - 65} pts</span></>
+                        : <>{linkedCustomer.points} pts</>
+                      }
+                    </div>
+                    {linkedCustomer.points >= 65 && (
+                      <button onClick={() => setRedeemVoucher(!redeemVoucher)} className={`kiosk-voucher-btn${redeemVoucher ? ' active' : ''}`}>
+                        {redeemVoucher ? '✓ Voucher Applied' : 'Use Free Drink (-65 pts)'}
+                      </button>
+                    )}
+                    <button onClick={() => { setLinkedCustomer(null); setRedeemVoucher(false); setRewardsEmail(''); setLookupMessage(''); }} className="kiosk-rewards-remove-btn">
+                      Remove Account
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="kiosk-sidebar main-cart-sidebar">
+            <h2 className="kiosk-heading">Your Order</h2>
+
             <div className="kiosk-order-list">
+
               {order.map((item) => (
-                <div key={item.instance_id} className="kiosk-order-item">
-                  <span>{item.name}</span>
-                  <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)}>✕</button>
+                <div key={item.instance_id} className="kiosk-order-item cart-item">
+                  <div className="cart-item-header">
+                    <span className="cart-item-name">{item.name}</span>
+                    <span className="cart-item-price">${Number(item.base_price * item.qty).toFixed(2)}</span>
+                  </div>
+                  {item.modifiers && item.modifiers.length > 0 && (
+                     <div className="cart-item-modifiers">
+                        {item.modifiers.map(m => m.name).join(", ")}
+                     </div>
+                  )}
+                  <div className="modifier-controls">
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(item.instance_id, -1)}>-</button>
+                    <span className="kiosk-qty-text">{item.qty}</span>
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(item.instance_id, 1)}>+</button>
+                    <button className="kiosk-edit-btn" onClick={() => editItem(item)}>EDIT</button>
+                    <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)}>✕</button>
+                  </div>
                 </div>
               ))}
+              {order.length === 0 && (
+                <div className="kiosk-empty-cart">
+                  <p>Your cart is empty.</p>
+                  <p>Select an item to begin!</p>
+                </div>
+              )}
             </div>
             <div className="kiosk-pinned">
+
+
+
+              {discount > 0 && (
+                <div className="kiosk-total-row" style={{ paddingTop: '8px', borderTop: 'none', color: '#2dd4bf' }}>
+                  <span>Discount</span>
+                  <span>-${discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="kiosk-total-row">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="kiosk-total-row" style={{ paddingTop: '8px', borderTop: 'none', fontSize: '1rem', color: '#64748b' }}>
+                <span>Tax</span>
+                <span>${tax.toFixed(2)}</span>
+              </div>
               <div className="kiosk-total-row">
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
               </div>
-              <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart</button>
+              <button 
+                className="kiosk-submit-btn" 
+                disabled={order.length === 0} 
+                onClick={placeOrder}
+              >
+                Checkout
+              </button>
             </div>
-          </div> */}
-          <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart ({order.length})</button>
+          </div>
         </div>
       </div>
-    </div>
-  ) : (
-    <div className="kiosk-layout">
-      {/* <div className="kiosk-display-layout"> */}
-        <div className="kiosk-menu">
-          {recommendedProducts.length > 0 && (
-            <>
-              <h2 className="kiosk-heading">{RECOMMENDED}</h2>
-              <div className="kiosk-product-grid">
-                {recommendedProducts.map((p) => (
-                  <button key={`rec-${p.product_id}`} className="kiosk-product-btn" onClick={() => addItem(p)}>
-                    {p.name}
-                    <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          <h2 className="kiosk-heading">Menu</h2>
-          <div className="kiosk-product-grid">
-            {products.map((p) => (
-              <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
-                {p.name}
-                <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* <div className="kiosk-sidebar">
-          <h2 className="kiosk-heading">Current Order</h2>
-          <div className="kiosk-order-list">
-            {order.map((item) => (
-              <div key={item.product_id} className="kiosk-order-item">
-                <span>{item.name}</span>
-                <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)}>✕</button>
-              </div>
-            ))}
-          </div>
-          <div className="kiosk-pinned">
-            <div className="kiosk-total-row">
-              <span>Total</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-            <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart</button>
-          </div>
-        </div> */}
-        <button className="kiosk-back-btn" onClick={() => toCart()}>View Cart ({order.length})</button>
-      {/* </div> */}
+      <Chatbot />
     </div>
   );
 };

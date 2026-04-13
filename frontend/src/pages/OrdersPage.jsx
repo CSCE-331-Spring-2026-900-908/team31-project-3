@@ -73,9 +73,9 @@ const OrdersPage = ({ cashierMode = false }) => {
       const orderData = await orderReq.json();
       const orderId = orderData.orderId;
 
-      // 2. Add Items
-      for (const item of order) {
-        await fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
+      // 2. Add all items in parallel
+      await Promise.all(order.map(item =>
+        fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -83,8 +83,8 @@ const OrdersPage = ({ cashierMode = false }) => {
             quantity: item.qty,
             modifiers: []
           })
-        });
-      }
+        })
+      ));
 
       // 3. Checkout
       await fetch(`${API_BASE_URL}/orders/${orderId}/checkout`, {
@@ -162,25 +162,23 @@ const OrdersPage = ({ cashierMode = false }) => {
               </button>
             ))}
           </div>
-          {grouped.filter(([cat]) => selectedCategory === "All" || cat === selectedCategory).map(([category, items]) => (
-            <div key={category} className="orders-category-section">
-              <h3 className="orders-category-heading">{category}</h3>
-              <div className="orders-product-grid">
-                {items.map((p) => (
-                  <button
-                    key={p.product_id}
-                    className="orders-product-btn"
-                    onClick={() => addItem(p)}
-                  >
-                    <span className="orders-product-name">{p.name}</span>
-                    <span className="orders-product-price">
-                      ${Number(p.base_price).toFixed(2)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="orders-product-grid">
+            {grouped
+              .filter(([cat]) => selectedCategory === "All" || cat === selectedCategory)
+              .flatMap(([, items]) => items)
+              .map((p) => (
+                <button
+                  key={p.product_id}
+                  className="orders-product-btn"
+                  onClick={() => addItem(p)}
+                >
+                  <span className="orders-product-name">{p.name}</span>
+                  <span className="orders-product-price">
+                    ${Number(p.base_price).toFixed(2)}
+                  </span>
+                </button>
+              ))}
+          </div>
         </div>
 
         <div className="orders-sidebar">

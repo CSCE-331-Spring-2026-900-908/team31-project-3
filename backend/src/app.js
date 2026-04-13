@@ -74,6 +74,19 @@ app.use("/reports", reportsRouter);
 app.use("/gemniAi", gemniAiRouter);
 app.use("/customers", customersRouter);
 
+app.get("/proxy-image", (req, res) => {
+  const url = req.query.url;
+  if (!url) return res.status(400).send("No URL provided");
+  const protocol = url.startsWith("https") ? require("https") : require("http");
+  protocol.get(url, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", "Referer": "https://www.google.com/" } }, (proxyRes) => {
+    res.writeHead(proxyRes.statusCode, {
+      "Content-Type": proxyRes.headers["content-type"],
+      "Cache-Control": "public, max-age=86400"
+    });
+    proxyRes.pipe(res);
+  }).on("error", (e) => res.status(500).send(e.message));
+});
+
 app.get("/", (req, res) => {
   res.json({ status: "ok" });
 });

@@ -7,6 +7,7 @@ const Cashier = ({ showNav = false }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [order, setOrder] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("All");
   
   // Rewards state
   const [customerEmail, setCustomerEmail] = useState("");
@@ -61,9 +62,9 @@ const Cashier = ({ showNav = false }) => {
       const orderData = await orderReq.json();
       const orderId = orderData.orderId;
 
-      // 2. Add Items
-      for (const item of order) {
-        await fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
+      // 2. Add all items in parallel
+      await Promise.all(order.map(item =>
+        fetch(`${API_BASE_URL}/orders/${orderId}/items`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -71,8 +72,8 @@ const Cashier = ({ showNav = false }) => {
             quantity: item.qty,
             modifiers: []
           })
-        });
-      }
+        })
+      ));
 
       // 3. Checkout
       await fetch(`${API_BASE_URL}/orders/${orderId}/checkout`, {
@@ -189,23 +190,42 @@ const Cashier = ({ showNav = false }) => {
     </>
   );
 
+  const categories = ["All", ...new Set(products.map(p => p.category_name).filter(Boolean))];
+  const filteredProducts = activeCategory === "All" 
+    ? products 
+    : products.filter(p => p.category_name === activeCategory);
+
+  const MenuContent = (
+    <div className="cashier-menu">
+      <h2 className="cashier-heading">Menu</h2>
+      <div className="cashier-category-nav">
+        {categories.map(cat => (
+          <button 
+            key={cat} 
+            className={`cashier-category-btn ${activeCategory === cat ? "active" : ""}`}
+            onClick={() => setActiveCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+      <div className="cashier-product-grid">
+        {filteredProducts.map((p) => (
+          <button key={p.product_id} className="cashier-product-btn" onClick={() => addItem(p)}>
+            {p.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
   return showNav ? (
     <div className="cashier-page">
       <nav className="cashier-navbar">
         <button className="cashier-signout-btn" onClick={handleSignOut}>Sign Out</button>
       </nav>
       <div className="cashier-layout">
-        <div className="cashier-menu">
-          <h2 className="cashier-heading">Menu</h2>
-          <div className="cashier-product-grid">
-            {products.map((p) => (
-              <button key={p.product_id} className="cashier-product-btn" onClick={() => addItem(p)}>
-                {p.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
+        {MenuContent}
         <div className="cashier-sidebar">
           {SidebarContent}
         </div>
@@ -213,17 +233,7 @@ const Cashier = ({ showNav = false }) => {
     </div>
   ) : (
     <div className="cashier-layout">
-      <div className="cashier-menu">
-        <h2 className="cashier-heading">Menu</h2>
-        <div className="cashier-product-grid">
-          {products.map((p) => (
-            <button key={p.product_id} className="cashier-product-btn" onClick={() => addItem(p)}>
-              {p.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
+      {MenuContent}
       <div className="cashier-sidebar">
         {SidebarContent}
       </div>
