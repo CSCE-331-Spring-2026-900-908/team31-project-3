@@ -216,13 +216,14 @@
 }
 
 .orders-customize-btn {
-  background: none;
+  background: #f3f4f6;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   color: #374151;
-  font-size: 0.75rem;
-  padding: 2px 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 8px 14px;
 }
 
 .orders-remove-btn {
