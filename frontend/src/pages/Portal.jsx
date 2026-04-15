@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-
+import bobamascot from "../assets/relaxing-rainbow.gif";
+import { useEffect, useState } from "react";
 const views = [
   { label: "Menu Board", path: "/menu-board", desc: "Non-interactive display" },
   { label: "Customer", path: "/customer", desc: "Self-service kiosk" },
@@ -7,8 +8,35 @@ const views = [
   { label: "Manager", path: "/manager", desc: "Point-of-sale system" },
 ];
 
-const Portal = () => (
-  <div style={styles.container}>
+ 
+
+const Portal = () => {
+
+   const [showImages, setShowImages] = useState(true);
+
+  useEffect(() => {
+    function handleResize() {
+      setShowImages(window.innerWidth > 1300);
+    }
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+
+return(
+  <>
+    {showImages && (
+        <>
+          <img style={styles.imgleft} src={bobamascot}/>
+          <img style={styles.imgright} src={bobamascot}/>
+        </>
+      )}
+   
+    <div style={styles.container}>
+    <h1 style={styles.heading}>BOBA INDEX MENU</h1>
     <div style={styles.grid}>
       {views.map(({ label, path, desc }) => (
         <Link key={path} to={path} style={styles.card}>
@@ -17,8 +45,11 @@ const Portal = () => (
         </Link>
       ))}
     </div>
+   
   </div>
-);
+  </>
+  );
+    };
 
 const styles = {
   container: {
@@ -28,12 +59,18 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     padding: "24px",
+    // background: "#b5ebf1",
+    background: "#DAF9EF",
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(2, 200px)",
-    gridTemplateRows: "repeat(2, 200px)",
+    gridTemplateColumns: "repeat(2, 300px)",
+    gridTemplateRows: "repeat(2, 300px)",
     gap: "16px",
+    
+
+    
+
   },
   card: {
     display: "flex",
@@ -42,22 +79,48 @@ const styles = {
     justifyContent: "center",
     gap: "6px",
     aspectRatio: "1 / 1",
-    background: "#fff",
+    // background: "#fff",
+    background: "#86C99D",
     border: "1px solid #e5e7eb",
     borderRadius: "12px",
     textDecoration: "none",
-    color: "#111827",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.07)",
+    // color: "#171b16",
+    boxShadow: "15px 15px 15px rgba(0,0,0,0.12)",
+    transition: "box-shadow 0.2s ease",
+
+    color: "#3d5f38",
     transition: "box-shadow 0.15s",
+  
+
   },
   cardLabel: {
     fontWeight: 600,
-    fontSize: "1.1rem",
+    fontSize: "1.4rem",
   },
   cardDesc: {
-    fontSize: "0.8rem",
-    color: "#6b7280",
+    fontSize: "1.0rem",
+    color: "#0B7374",
   },
+
+  heading:{
+    fontWeight: 600,
+    fontSize: "2 rem",
+    color: "#3d5f38",
+    
+  },
+  imgright:{
+    width: "300px",
+    position:"absolute",
+    height:"100%",
+    left:"0%"
+  },
+  imgleft:{
+    width: "300px",
+    position:"absolute",
+    height:"100%",
+    right:"0%"
+  }
 };
+
 
 export default Portal;
