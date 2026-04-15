@@ -255,9 +255,9 @@ const Kiosk = ({ showNav = false }) => {
             <WeatherWidget />
           </div>
           <div className="kiosk-display-layout">
-            <div className="kiosk-menu">
+            <div className="kiosk-menu" aria-label="Customization options">
               {['Topping', 'Ice Level', 'Sugar Level', 'Size', 'Milk Type'].map(category => (
-                <div key={category} className="kiosk-modifier-group">
+                <div key={category} className="kiosk-modifier-group" aria-label={category}>
                   <h2 className="kiosk-heading">{category}s</h2>
                   <div className="kiosk-product-grid modifiers">
                     {productModifiers.filter((m) => m.category === category).map((m) => {
@@ -284,9 +284,11 @@ const Kiosk = ({ showNav = false }) => {
                           </button>
                           {category === 'Topping' && applied && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '8px', background: '#e2e8f0', borderRadius: '8px' }}>
-                              <button onClick={() => setModifierQty(m.option_id, -1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }}>-</button>
-                              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>{applied.qty || 1}</span>
-                              <button onClick={() => setModifierQty(m.option_id, 1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }}>+</button>
+                              <button onClick={() => setModifierQty(m.option_id, -1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }} aria-label={`Decrease quantity of ${m.name}`}>-</button>
+                              <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }} role="status" aria-label={`Quantity of ${m.name}`} aria-live="polite">
+                                {applied.qty || 1}
+                              </span>
+                              <button onClick={() => setModifierQty(m.option_id, 1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }} aria-label={`Increase quantity of ${m.name}`}>+</button>
                             </div>
                           )}
                         </div>
@@ -305,9 +307,11 @@ const Kiosk = ({ showNav = false }) => {
                     <span className="cart-item-name">Drink Quantity</span>
                   </div>
                   <div className="modifier-controls">
-                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(currItem.instance_id, -1)}>-</button>
-                    <span className="kiosk-qty-text">{order.find(item => item.instance_id === currItem.instance_id)?.qty || 1}</span>
-                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(currItem.instance_id, 1)}>+</button>
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(currItem.instance_id, -1)} aria-label={`Decrease quantity of ${currItem.name}`}>-</button>
+                    <span className="kiosk-qty-text" role="status" aria-label={`Quantity of ${currItem.name}`} aria-live="polite">
+                      {order.find(item => item.instance_id === currItem.instance_id)?.qty || 1}
+                    </span>
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(currItem.instance_id, 1)} aria-label={`Increase quantity of ${currItem.name}`}>+</button>
                   </div>
                 </div>
                 {order.find(item => item.instance_id === currItem.instance_id)?.modifiers.map((modifier) => (
@@ -422,6 +426,7 @@ const Kiosk = ({ showNav = false }) => {
                     className="kiosk-email-field"
                     style={{ marginBottom: '8px' }}
                     autoFocus
+                    aria-label="Rewards email input field"
                   />
                   <button onClick={handleLookup} className="kiosk-apply-rewards-btn" style={{ width: '100%' }}>Look Up</button>
                   {lookupMessage && (
@@ -468,11 +473,11 @@ const Kiosk = ({ showNav = false }) => {
                      </div>
                   )}
                   <div className="modifier-controls">
-                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(item.instance_id, -1)}>-</button>
-                    <span className="kiosk-qty-text">{item.qty}</span>
-                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(item.instance_id, 1)}>+</button>
-                    <button className="kiosk-edit-btn" onClick={() => editItem(item)}>EDIT</button>
-                    <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)}>✕</button>
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(item.instance_id, -1)} aria-label={`Decrease quantity of ${item.name}`}>-</button>
+                    <span className="kiosk-qty-text" role="status" aria-label={`Quantity of ${item.name}`} aria-live="polite">{item.qty}</span>
+                    <button className="kiosk-qty-btn" onClick={() => setQtyItem(item.instance_id, 1)} aria-label={`Increase quantity of ${item.name}`}>+</button>
+                    <button className="kiosk-edit-btn" onClick={() => editItem(item)} aria-label={`Edit ${item.name}`}>EDIT</button>
+                    <button className="kiosk-remove-btn" onClick={() => removeItem(item.instance_id)} aria-label={`Remove ${item.name}`}>✕</button>
                   </div>
                 </div>
               ))}
