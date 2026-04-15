@@ -126,6 +126,8 @@ const Kiosk = ({ showNav = false }) => {
     if (!item) return;
     if (item.qty + delta <= 0) {
       setOrder((prev) => prev.filter((i) => i.instance_id !== instance_id));
+      setCurrItem(null);
+      setCustomizing(false);
       return;
     }
     setOrder((prev) => prev.map((i) => i.instance_id === instance_id ? { ...i, qty: i.qty + delta } : i));
