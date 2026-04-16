@@ -594,3 +594,14 @@
 .kiosk-apply-rewards-btn:hover {
   background: #1e293b;
 }
+
+.dietImg{
+
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+
+  position: absolute;   /* removes from normal flow */
+  right: 8px;           /* pushes to right side */
+  bottom: 10px;             /* distance from top */
+}

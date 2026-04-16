@@ -434,7 +434,7 @@ const OrdersPage = ({ cashierMode = false }) => {
           </div>
         </div>
       </div>
-
+           
       {/* ── Customization Modal ── */}
       {customizingItem && (
         <div

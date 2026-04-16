@@ -15,7 +15,8 @@ router.get("/", async (req, res) => {
           category_name,
           can_be_served_hot,
           is_active,
-          image_url
+          image_url,
+          diet
         FROM product
         ORDER BY product_id, name
       )
@@ -27,6 +28,7 @@ router.get("/", async (req, res) => {
         p.can_be_served_hot,
         p.is_active,
         p.image_url,
+        p.diet,
         COALESCE(di.dietary_tags, ARRAY[]::text[]) AS dietary_tags,
         COALESCE(ai.allergen_tags, ARRAY[]::text[]) AS allergen_tags
       FROM unique_products p
@@ -76,19 +78,20 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { name, base_price, category_name, can_be_served_hot, is_active } = req.body;
+  const { name, base_price, category_name, can_be_served_hot, is_active, diet } = req.body;
   if (!name || base_price === undefined) {
     return res.status(400).json({ error: "name and base_price are required." });
   }
   try {
     const result = await db.query(
-      "INSERT INTO product (name, base_price, category_name, can_be_served_hot, is_active) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      "INSERT INTO product (name, base_price, category_name, can_be_served_hot, is_active, diet) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
       [
         name.trim(),
         Number(base_price),
         category_name || null,
         Boolean(can_be_served_hot),
         is_active !== false,
+        diet || "None",
       ]
     );
     res.status(201).json(result.rows[0]);
@@ -102,20 +105,22 @@ router.put("/:id", async (req, res) => {
   if (!Number.isInteger(productId)) {
     return res.status(400).json({ error: "Invalid product id." });
   }
-  const { name, base_price, category_name, can_be_served_hot, is_active } = req.body;
+  const { name, base_price, category_name, can_be_served_hot, is_active,diet } = req.body;
   if (!name || base_price === undefined) {
     return res.status(400).json({ error: "name and base_price are required." });
   }
   try {
     const result = await db.query(
-      "UPDATE product SET name = $1, base_price = $2, category_name = $3, can_be_served_hot = $4, is_active = $5 WHERE product_id = $6 RETURNING *",
+      "UPDATE product SET name = $1, base_price = $2, category_name = $3, can_be_served_hot = $4, is_active = $5, diet = $6 WHERE product_id = $7 RETURNING *",
       [
         name.trim(),
         Number(base_price),
         category_name || null,
         Boolean(can_be_served_hot),
         Boolean(is_active),
+        diet || "None",
         productId,
+        
       ]
     );
     if (result.rowCount === 0) {

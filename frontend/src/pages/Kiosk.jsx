@@ -3,6 +3,8 @@ import "./Kiosk.css";
 import { getWeather } from "./WeatherAPI";
 import Chatbot from "./Chatbot";
 import API_BASE_URL from "../config/apiBaseUrl";
+import vegan_icon from "../assets/vegan_icon.png"; 
+import dairy_icon from "../assets/Dairyicon.png"; 
 
 const API = API_BASE_URL;
 
@@ -364,6 +366,10 @@ const Kiosk = ({ showNav = false }) => {
                         alt={p.name} 
                         className="kiosk-product-image" 
                       />
+                        {(p.diet === 'Vegan') && 
+                          <img className="dietImg" src = {vegan_icon}/>}
+                        {(p.diet === 'Dairy') && 
+                          <img className="dietImg" src = {dairy_icon}/>}
                     </button>
                   ))}
                 </div>
@@ -390,6 +396,13 @@ const Kiosk = ({ showNav = false }) => {
                             e.target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23f8fafc' rx='12'/><text x='50' y='50' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='11' font-weight='600' fill='%2394a3b8'>NO IMAGE</text></svg>";
                           }}
                         />
+                        
+                        
+                        
+                        {(p.diet === 'Vegan') && 
+                          <img className="dietImg" src = {vegan_icon}/>}
+                        {(p.diet === 'Dairy') && 
+                          <img className="dietImg" src = {dairy_icon}/>}
                       </button>
                     ))}
                   </div>

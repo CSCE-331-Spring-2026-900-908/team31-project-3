@@ -19,6 +19,7 @@ const MenuEditPage = () => {
   const [newPrice, setNewPrice] = useState("");
   const [newCanBeServedHot, setNewCanBeServedHot] = useState(false);
   const [newActive, setNewActive] = useState(true);
+  const [newDiet, setNewDiet] = useState("None");
 
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
@@ -26,6 +27,7 @@ const MenuEditPage = () => {
   const [editPrice, setEditPrice] = useState("");
   const [editCanBeServedHot, setEditCanBeServedHot] = useState(false);
   const [editActive, setEditActive] = useState(true);
+  const [editDiet, setEditDiet] = useState("None");
 
   const loadMenuItems = async () => {
     setLoading(true);
@@ -83,6 +85,7 @@ const MenuEditPage = () => {
           category_name: newCategory.trim() || null,
           can_be_served_hot: newCanBeServedHot,
           is_active: newActive,
+          diet: newDiet,
         }),
       });
       const data = await response.json();
@@ -108,6 +111,7 @@ const MenuEditPage = () => {
     setEditPrice(String(item.base_price ?? ""));
     setEditCanBeServedHot(item.can_be_served_hot === true);
     setEditActive(item.is_active !== false);
+    setEditDiet(item.diet || "None");
     setError("");
   };
 
@@ -118,6 +122,7 @@ const MenuEditPage = () => {
     setEditPrice("");
     setEditCanBeServedHot(false);
     setEditActive(true);
+    setEditDiet("None");
   };
 
   const handleSaveEdit = async (productId) => {
@@ -144,6 +149,7 @@ const MenuEditPage = () => {
           category_name: editCategory.trim() || null,
           can_be_served_hot: editCanBeServedHot,
           is_active: editActive,
+          diet: editDiet,
         }),
       });
       const data = await response.json();
@@ -232,7 +238,7 @@ const MenuEditPage = () => {
               Add Item
             </button>
           </div>
-
+             
           {error ? <p className="manager-error">{error}</p> : null}
           {loading ? <p className="manager-muted">Loading menu items...</p> : null}
 
@@ -245,9 +251,11 @@ const MenuEditPage = () => {
                   <th className="menu-col-price">Price</th>
                   <th className="menu-col-active">Hot</th>
                   <th className="menu-col-active">Active</th>
+                  <th className="menu-col-active">Diet</th>
                   <th className="menu-col-actions">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {filteredItems.map((item) => {
                   const isEditing = editingId === item.product_id;
@@ -312,6 +320,47 @@ const MenuEditPage = () => {
                         ) : (
                           item.is_active ? "Yes" : "No"
                         )}
+                      </td>
+                      <td>
+                        {isEditing ? (
+                        <div className="manager-radio-group">
+                          <label className="manager-radio-option">
+                            <input
+                              type="radio"
+                              name={`edit-diet-${item.product_id}`}
+                              value="None"
+                              checked={editDiet === "None"}
+                              onChange={(e) => setEditDiet(e.target.value)}
+                            />
+                            None
+                          </label>
+                          <br/>
+
+                          <label className="manager-radio-option">
+                            <input
+                              type="radio"
+                              name={`edit-diet-${item.product_id}`}
+                              value="Vegan"
+                              checked={editDiet === "Vegan"}
+                              onChange={(e) => setEditDiet(e.target.value)}
+                            />
+                            Vegan
+                          </label>
+                           <br/>
+                          <label className="manager-radio-option">
+                            <input
+                              type="radio"
+                              name={`edit-diet-${item.product_id}`}
+                              value="Dairy"
+                              checked={editDiet === "Dairy"}
+                              onChange={(e) => setEditDiet(e.target.value)}
+                            />
+                            Dairy
+                          </label>
+                        </div>
+                      ) : (
+                        item.diet || "None"
+                      )}
                       </td>
                       <td className="manager-actions-cell">
                         {isEditing ? (
@@ -432,6 +481,42 @@ const MenuEditPage = () => {
                     onChange={(e) => setNewActive(e.target.checked)}
                   />
 
+                  <label className="manager-modal-label">Dietary Restrictions</label>
+                  
+                    <label className="manager-radio-option">
+                      <input
+                        type="radio"
+                        name="diet"
+                        value="None"
+                        checked={newDiet === "None"}
+                        onChange={(e) => setNewDiet(e.target.value)}
+                      />
+                      None
+                    </label>
+
+                    <label className="manager-radio-option">
+                      <input
+                        type="radio"
+                        name="diet"
+                        value="Vegan"
+                        checked={newDiet === "Vegan"}
+                        onChange={(e) => setNewDiet(e.target.value)}
+                      />
+                      Vegan
+                    </label>
+
+                    <label className="manager-radio-option">
+                      <input
+                        type="radio"
+                        name="diet"
+                        value="Dairy"
+                        checked={newDiet === "Dairy"}
+                        onChange={(e) => setNewDiet(e.target.value)}
+                      />
+                      Dairy
+                    </label>
+                  
+
                   <div className="manager-modal-actions">
                     <button type="submit" className="manager-add-btn">
                       Add Item
@@ -446,6 +531,7 @@ const MenuEditPage = () => {
                         setNewPrice("");
                         setNewCanBeServedHot(false);
                         setNewActive(true);
+                        
                       }}
                     >
                       Cancel
