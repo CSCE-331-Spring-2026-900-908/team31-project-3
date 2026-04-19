@@ -1,5 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+:root {
+  --kiosk-brand-50: #fff7ed;
+  --kiosk-brand-100: #ffedd5;
+  --kiosk-brand-200: #fed7aa;
+  --kiosk-brand-400: #fb923c;
+  --kiosk-brand-500: #f97316;
+  --kiosk-brand-600: #ea580c;
+  --kiosk-brand-700: #c2410c;
+  --kiosk-ink-900: #0f172a;
+  --kiosk-ink-700: #334155;
+  --kiosk-ink-600: #475569;
+  --kiosk-surface: #ffffff;
+  --kiosk-surface-soft: #fffaf5;
+  --kiosk-border: #fed7aa;
+  --kiosk-bg: #fff7ed;
+  --kiosk-shadow: rgba(15, 23, 42, 0.12);
+
+  /* Reserved for high-contrast toggle implementation */
+  --kiosk-hc-bg: #ffffff;
+  --kiosk-hc-surface: #ffffff;
+  --kiosk-hc-ink: #000000;
+  --kiosk-hc-border: #000000;
+  --kiosk-hc-accent: #000000;
+}
+
 .kiosk-page {
   display: flex;
   flex-direction: column;
@@ -7,7 +32,7 @@
   flex: 1;
   min-height: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: #f1f5f9;
+  background: var(--kiosk-bg);
   overflow: hidden;
 }
 
@@ -15,9 +40,9 @@
   display: flex;
   gap: 8px;
   padding: 12px 24px;
-  background: #ffffff;
+  background: var(--kiosk-surface);
   align-items: center;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--kiosk-border);
   z-index: 10;
 }
 
@@ -49,7 +74,7 @@
   padding: 24px;
   gap: 16px;
   box-sizing: border-box;
-  min-width: 872px;
+  min-width: 0;
   overflow: hidden; /* To keep scroll contained inside */
 }
 
@@ -57,8 +82,8 @@
 .kiosk-topbar {
   flex: 0 0 auto;
   align-self: stretch;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--kiosk-surface);
+  border: 1px solid var(--kiosk-border);
   border-radius: 8px;
   padding: 12px 24px;
   display: flex;
@@ -79,26 +104,26 @@
 
 .kiosk-category-btn {
   padding: 12px 20px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--kiosk-surface);
+  border: 1px solid var(--kiosk-border);
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-size: 1rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--kiosk-ink-600);
   white-space: nowrap;
   transition: all 0.15s ease;
 }
 
 .kiosk-category-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--kiosk-brand-50);
+  border-color: var(--kiosk-brand-200);
 }
 
 .kiosk-category-btn.active {
-  background: #0f172a;
-  border-color: #0f172a;
+  background: var(--kiosk-brand-600);
+  border-color: var(--kiosk-brand-600);
   color: white;
 }
 
@@ -107,10 +132,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #ffffff;
+  background: var(--kiosk-surface);
   padding: 6px 16px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--kiosk-border);
 }
 
 .kiosk-weather-widget img {
@@ -127,14 +152,14 @@
 .kiosk-weather-temp {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #0369a1;
+  color: var(--kiosk-brand-700);
   line-height: 1.1;
 }
 
 .kiosk-weather-desc {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #0284c7;
+  color: var(--kiosk-brand-600);
   text-transform: capitalize;
 }
 
@@ -168,7 +193,7 @@
   margin: 0 0 16px;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--kiosk-ink-900);
   letter-spacing: -0.5px;
 }
 
@@ -184,31 +209,31 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 12px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--kiosk-surface);
+  border: 1px solid var(--kiosk-border);
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #334155;
+  color: var(--kiosk-ink-700);
   transition: all 0.15s ease;
   position: relative;
   overflow: hidden;
 }
 
 .kiosk-product-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--kiosk-brand-50);
+  border-color: var(--kiosk-brand-200);
 }
 
 .kiosk-product-btn:active {
-  background: #f1f5f9;
+  background: var(--kiosk-brand-100);
 }
 
 .kiosk-product-btn.applied {
-  background: #0f172a;
-  border-color: #0f172a;
+  background: var(--kiosk-brand-600);
+  border-color: var(--kiosk-brand-600);
   box-shadow: none;
   color: white;
 }
@@ -233,8 +258,8 @@
 /* ── Sidebar (Cart & Customization) ── */
 .kiosk-sidebar {
   flex: 0 0 340px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--kiosk-surface);
+  border: 1px solid var(--kiosk-border);
   border-radius: 8px;
   padding: 24px;
   display: flex;
@@ -260,7 +285,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #0f172a;
+  background: var(--kiosk-brand-600);
   color: white;
   border: none;
   border-radius: 24px;
@@ -275,12 +300,12 @@
 }
 
 .kiosk-rewards-fab:hover {
-  background: #1e293b;
+  background: var(--kiosk-brand-700);
   transform: translateY(-1px);
 }
 
 .kiosk-rewards-fab.linked {
-  background: #0369a1;
+  background: var(--kiosk-brand-500);
 }
 
 .kiosk-rewards-fab-pts {
@@ -292,8 +317,8 @@
 }
 
 .kiosk-rewards-dropdown {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--kiosk-surface);
+  border: 1px solid var(--kiosk-border);
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.14);
   width: 280px;
@@ -318,7 +343,7 @@
 .kiosk-voucher-btn {
   width: 100%;
   padding: 10px 12px;
-  background: #3b82f6;
+  background: var(--kiosk-brand-600);
   color: white;
   border: none;
   border-radius: 8px;
@@ -330,7 +355,7 @@
 }
 
 .kiosk-voucher-btn.active {
-  background: #2dd4bf;
+  background: var(--kiosk-brand-500);
 }
 
 .kiosk-voucher-btn:hover {
@@ -380,7 +405,7 @@
   align-items: center;
   padding: 14px 0;
   background: transparent;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--kiosk-brand-100);
 }
 
 .kiosk-order-item.cart-item {
@@ -397,26 +422,26 @@
 
 .cart-item-name {
   font-weight: 700;
-  color: #1e293b;
+  color: var(--kiosk-ink-900);
   font-size: 1rem;
 }
 
 .cart-item-price {
   font-weight: 800;
-  color: #3b82f6;
+  color: var(--kiosk-brand-600);
   font-size: 1.1rem;
 }
 
 .cart-item-modifiers {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--kiosk-ink-600);
   line-height: 1.4;
 }
 
 .modifier-name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--kiosk-ink-700);
 }
 
 .modifier-controls {
@@ -429,7 +454,7 @@
 }
 
 .kiosk-qty-btn {
-  background: #f1f5f9;
+  background: var(--kiosk-brand-100);
   border: none;
   width: 26px;
   height: 26px;
@@ -439,18 +464,18 @@
   justify-content: center;
   cursor: pointer;
   font-weight: 800;
-  color: #475569;
+  color: var(--kiosk-ink-600);
   transition: all 0.2s;
 }
 
 .kiosk-qty-btn:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--kiosk-brand-200);
+  color: var(--kiosk-ink-900);
 }
 
 .kiosk-qty-text {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--kiosk-ink-900);
   min-width: 14px;
   text-align: center;
 }
@@ -473,7 +498,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #3b82f6;
+  color: var(--kiosk-brand-600);
   font-weight: 700;
   font-size: 0.85rem;
   margin-left: 8px;
@@ -481,7 +506,7 @@
 }
 
 .kiosk-edit-btn:hover {
-  color: #2563eb;
+  color: var(--kiosk-brand-700);
   transform: scale(1.05);
 }
 
@@ -502,7 +527,7 @@
   flex-direction: column;
   gap: 16px;
   padding-top: 16px;
-  border-top: 2px dashed #e2e8f0;
+  border-top: 2px dashed var(--kiosk-brand-200);
 }
 
 .kiosk-total-row {
@@ -510,12 +535,12 @@
   justify-content: space-between;
   font-weight: 800;
   font-size: 1.5rem;
-  color: #0f172a;
+  color: var(--kiosk-ink-900);
 }
 
 .kiosk-submit-btn {
   padding: 16px;
-  background: #0f172a;
+  background: var(--kiosk-brand-600);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -529,12 +554,12 @@
 }
 
 .kiosk-submit-btn:hover:not(:disabled) {
-  background: #1e293b;
+  background: var(--kiosk-brand-700);
   box-shadow: none;
 }
 
 .kiosk-submit-btn:disabled {
-  background: #cbd5e1;
+  background: var(--kiosk-brand-200);
   box-shadow: none;
   cursor: not-allowed;
   transform: none;
@@ -542,7 +567,7 @@
 
 .kiosk-back-btn {
   padding: 16px;
-  background: #ffffff;
+  background: var(--kiosk-surface);
   color: #ef4444;
   border: 1px solid #ef4444;
   border-radius: 8px;
@@ -557,12 +582,12 @@
 }
 
 .kiosk-back-btn:hover {
-  background: #fef2f2;
+  background: #fee2e2;
 }
 
 .kiosk-email-field {
   padding: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--kiosk-border);
   border-radius: 8px;
   width: 100%;
   font-family: inherit;
@@ -570,16 +595,16 @@
   margin-bottom: 16px;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  background: #ffffff;
+  background: var(--kiosk-surface);
 }
 
 .kiosk-email-field:focus {
   outline: none;
-  border-color: #0f172a;
+  border-color: var(--kiosk-brand-600);
 }
 
 .kiosk-apply-rewards-btn {
-  background: #0f172a;
+  background: var(--kiosk-brand-600);
   color: white;
   border: none;
   border-radius: 8px;
@@ -592,7 +617,7 @@
 }
 
 .kiosk-apply-rewards-btn:hover {
-  background: #1e293b;
+  background: var(--kiosk-brand-700);
 }
 
 .dietImg{
@@ -604,4 +629,49 @@
   position: absolute;   /* removes from normal flow */
   right: 8px;           /* pushes to right side */
   bottom: 10px;             /* distance from top */
+}
+
+@media (max-width: 1100px) {
+  .kiosk-display-layout {
+    flex-direction: column;
+  }
+
+  .kiosk-sidebar {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 820px) {
+  .kiosk-layout {
+    padding: 16px;
+  }
+
+  .kiosk-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .kiosk-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .kiosk-navbar {
+    padding: 10px 16px;
+  }
+
+  .kiosk-layout {
+    padding: 12px;
+  }
+
+  .kiosk-sidebar {
+    padding: 16px;
+  }
+
+  .kiosk-rewards-overlay {
+    left: 12px;
+    bottom: 12px;
+  }
 }
