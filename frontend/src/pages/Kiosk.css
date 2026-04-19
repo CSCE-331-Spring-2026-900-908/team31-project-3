@@ -308,6 +308,11 @@
   margin-bottom: 24px;
 }
 
+.kiosk-page--large-ui .kiosk-product-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
 .kiosk-product-btn {
   display: flex;
   flex-direction: column;
@@ -343,12 +348,22 @@
   color: white;
 }
 
+.kiosk-page--large-ui .kiosk-product-btn {
+  min-height: 200px;
+  padding: 18px;
+  font-size: 1.05rem;
+}
+
 .kiosk-product-image {
   width: 100%;
   aspect-ratio: 1;
   object-fit: contain;
   margin-top: 12px;
   border-radius: 12px;
+}
+
+.kiosk-page--large-ui .kiosk-product-image {
+  margin-top: 16px;
 }
 
 .kiosk-modifier-group {
@@ -358,6 +373,10 @@
 .kiosk-product-grid.modifiers {
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 10px;
+}
+
+.kiosk-page--large-ui .kiosk-product-grid.modifiers {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 }
 
 .kiosk-sidebar {
