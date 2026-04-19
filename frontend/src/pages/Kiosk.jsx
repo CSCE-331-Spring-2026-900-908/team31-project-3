@@ -24,6 +24,7 @@ const Kiosk = ({ showNav = false }) => {
   const [redeemVoucher, setRedeemVoucher] = useState(false);
   const [lookupMessage, setLookupMessage] = useState("");
   const [rewardsOpen, setRewardsOpen] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
   let defaultModifiers = [];
   let productCounter = 0;
 
@@ -245,12 +246,29 @@ const Kiosk = ({ showNav = false }) => {
   // Render customization screen
   if (customizing && currItem) {
     return (
-      <div className="kiosk-page">
+      <div
+        className={[
+          "kiosk-page",
+          highContrast ? "kiosk-page--high-contrast" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         {showNav && (
           <nav className="kiosk-navbar">
             <button className="kiosk-signout-btn">Sign Out</button>
           </nav>
         )}
+        <div className="kiosk-accessibility-controls" aria-label="Accessibility settings">
+          <button
+            type="button"
+            className={`kiosk-accessibility-btn ${highContrast ? "active" : ""}`}
+            onClick={() => setHighContrast((value) => !value)}
+            aria-pressed={highContrast}
+          >
+            {highContrast ? "High Contrast: On" : "High Contrast: Off"}
+          </button>
+        </div>
         <div className="kiosk-layout customizing">
           <div className="kiosk-topbar">
             <h2 className="kiosk-heading">Customizing: {currItem.name}</h2>
@@ -336,12 +354,29 @@ const Kiosk = ({ showNav = false }) => {
 
   // Main menu view
   return (
-    <div className="kiosk-page">
+    <div
+      className={[
+        "kiosk-page",
+        highContrast ? "kiosk-page--high-contrast" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {showNav && (
         <nav className="kiosk-navbar">
           <button className="kiosk-signout-btn">Sign Out</button>
         </nav>
       )}
+      <div className="kiosk-accessibility-controls" aria-label="Accessibility settings">
+        <button
+          type="button"
+          className={`kiosk-accessibility-btn ${highContrast ? "active" : ""}`}
+          onClick={() => setHighContrast((value) => !value)}
+          aria-pressed={highContrast}
+        >
+          {highContrast ? "High Contrast: On" : "High Contrast: Off"}
+        </button>
+      </div>
       <div className="kiosk-layout">
         <div className="kiosk-topbar">
           <div className="kiosk-category-scroll">
