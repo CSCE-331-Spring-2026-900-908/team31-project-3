@@ -25,6 +25,7 @@ const Kiosk = ({ showNav = false }) => {
   const [lookupMessage, setLookupMessage] = useState("");
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
+  const [largeUI, setLargeUI] = useState(false);
   let defaultModifiers = [];
   let productCounter = 0;
 
@@ -250,6 +251,7 @@ const Kiosk = ({ showNav = false }) => {
         className={[
           "kiosk-page",
           highContrast ? "kiosk-page--high-contrast" : "",
+          largeUI ? "kiosk-page--large-ui" : ""
         ]
           .filter(Boolean)
           .join(" ")}
@@ -268,6 +270,14 @@ const Kiosk = ({ showNav = false }) => {
           >
             {highContrast ? "High Contrast: On" : "High Contrast: Off"}
           </button>
+          <button
+            type="button"
+            className={`kiosk-accessibility-btn ${largeUI ? "active" : ""}`}
+            onClick={() => setLargeUI((value) => !value)}
+            aria-pressed={largeUI}
+          >
+          {largeUI ? "Large UI: On" : "Large UI: Off"}
+        </button>
         </div>
         <div className="kiosk-layout customizing">
           <div className="kiosk-topbar">
@@ -358,6 +368,7 @@ const Kiosk = ({ showNav = false }) => {
       className={[
         "kiosk-page",
         highContrast ? "kiosk-page--high-contrast" : "",
+        largeUI ? "kiosk-page--large-ui" : ""
       ]
         .filter(Boolean)
         .join(" ")}
@@ -375,6 +386,14 @@ const Kiosk = ({ showNav = false }) => {
           aria-pressed={highContrast}
         >
           {highContrast ? "High Contrast: On" : "High Contrast: Off"}
+        </button>
+        <button
+          type="button"
+          className={`kiosk-accessibility-btn ${largeUI ? "active" : ""}`}
+          onClick={() => setLargeUI((value) => !value)}
+          aria-pressed={largeUI}
+        >
+          {largeUI ? "Large UI: On" : "Large UI: Off"}
         </button>
       </div>
       <div className="kiosk-layout">
