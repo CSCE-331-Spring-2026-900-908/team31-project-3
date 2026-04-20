@@ -15,7 +15,7 @@ const Kiosk = ({ showNav = false }) => {
   const [customizing, setCustomizing] = useState(false);
   const [currItem, setCurrItem] = useState(null);
   const [products, setProducts] = useState([]);
-  const [productModifiers, setProductModifiers] = useState([]);
+  const [productModifiersByProductId, setProductModifiersByProductId] = useState({});
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(RECOMMENDED);
   const [weatherData, setWeatherData] = useState(null);
@@ -26,25 +26,29 @@ const Kiosk = ({ showNav = false }) => {
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeUI, setLargeUI] = useState(false);
-  let defaultModifiers = [];
-  let productCounter = 0;
-
   useEffect(() => {
     fetch(`${API}/product`)
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error);
-    fetch(`${API}/productmodifier`)
-      .then((r) => r.json())
-      .then((data) => setProductModifiers(Array.isArray(data) ? data : []))
-      .catch(console.error);
   }, []);
 
-  useEffect(() => {
-    // Collect default modifiers after fetch automatically or in a cleaner way, but here it's fine
-    // Since we depend on productModifiers, it'll populate when productModifiers loads.
-    // However, productCounter should strictly be handled better, but we'll adapt existing logic.
-  }, [productModifiers]);
+  const getProductModifiers = (productId) =>
+    productModifiersByProductId[productId] || [];
+
+  const ensureProductModifiers = async (productId) => {
+    if (productModifiersByProductId[productId]) {
+      return productModifiersByProductId[productId];
+    }
+    const response = await fetch(`${API}/product/${productId}/modifiers`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to load product modifiers.");
+    }
+    const modifiers = Array.isArray(data) ? data : [];
+    setProductModifiersByProductId((prev) => ({ ...prev, [productId]: modifiers }));
+    return modifiers;
+  };
 
   useEffect(() => {
     async function loadWeather() {
@@ -67,19 +71,31 @@ const Kiosk = ({ showNav = false }) => {
     return shuffled.slice(0, 5);
   }, [products, weatherData]);
 
-  const addItem = (product) => {
-    const defaults = productModifiers.filter(m => m.is_default).map(m => ({ ...m, qty: 1 }));
-    const instance_id = Date.now() + Math.random();
-    const newItem = { ...product, modifiers: defaults, qty: 1, instance_id };
-    
-    setOrder((prev) => [...prev, newItem]);
-    setCurrItem(newItem);
-    setCustomizing(true);
+  const addItem = async (product) => {
+    try {
+      const productModifiers = await ensureProductModifiers(product.product_id);
+      const defaults = productModifiers
+        .filter((m) => m.is_default)
+        .map((m) => ({ ...m, qty: 1 }));
+      const instance_id = Date.now() + Math.random();
+      const newItem = { ...product, modifiers: defaults, qty: 1, instance_id };
+
+      setOrder((prev) => [...prev, newItem]);
+      setCurrItem(newItem);
+      setCustomizing(true);
+    } catch (err) {
+      alert(err.message || "Could not load customization options.");
+    }
   };
 
-  const editItem = (item) => {
-    setCurrItem(item);
-    setCustomizing(true);
+  const editItem = async (item) => {
+    try {
+      await ensureProductModifiers(item.product_id);
+      setCurrItem(item);
+      setCustomizing(true);
+    } catch (err) {
+      alert(err.message || "Could not load customization options.");
+    }
   };
 
   const endCustomization = () => {
@@ -290,7 +306,7 @@ const Kiosk = ({ showNav = false }) => {
                 <div key={category} className="kiosk-modifier-group" aria-label={category}>
                   <h2 className="kiosk-heading">{category}s</h2>
                   <div className="kiosk-product-grid modifiers">
-                    {productModifiers.filter((m) => m.category === category).map((m) => {
+                    {getProductModifiers(currItem.product_id).filter((m) => m.category === category).map((m) => {
                       const activeItem = order.find(item => item.instance_id === currItem.instance_id);
                       const applied = activeItem?.modifiers.find((i) => String(i.option_id) === String(m.option_id));
                       return (

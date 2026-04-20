@@ -6,8 +6,11 @@ import API_BASE_URL from "../config/apiBaseUrl";
 const Cashier = ({ showNav = false }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [productModifiersByProductId, setProductModifiersByProductId] = useState({});
   const [order, setOrder] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [customizing, setCustomizing] = useState(false);
+  const [currItem, setCurrItem] = useState(null);
   
   // Rewards state
   const [customerEmail, setCustomerEmail] = useState("");
@@ -22,15 +25,108 @@ const Cashier = ({ showNav = false }) => {
       .catch(console.error);
   }, []);
 
-  const addItem = (product) => {
-    setOrder((prev) => {
-      const existing = prev.find((i) => i.product_id === product.product_id);
-      if (existing) return prev.map((i) => i.product_id === product.product_id ? { ...i, qty: i.qty + 1 } : i);
-      return [...prev, { ...product, qty: 1 }];
-    });
+  const getProductModifiers = (productId) => productModifiersByProductId[productId] || [];
+
+  const ensureProductModifiers = async (productId) => {
+    if (productModifiersByProductId[productId]) return productModifiersByProductId[productId];
+    const response = await fetch(`${API_BASE_URL}/product/${productId}/modifiers`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to load modifiers.");
+    }
+    const modifiers = Array.isArray(data) ? data : [];
+    setProductModifiersByProductId((prev) => ({ ...prev, [productId]: modifiers }));
+    return modifiers;
   };
 
-  const removeItem = (id) => setOrder((prev) => prev.filter((i) => i.product_id !== id));
+  const addItem = async (product) => {
+    try {
+      const modifiers = await ensureProductModifiers(product.product_id);
+      const defaults = modifiers
+        .filter((modifier) => modifier.is_default)
+        .map((modifier) => ({ ...modifier, qty: 1 }));
+      const instance_id = Date.now() + Math.random();
+      const newItem = { ...product, qty: 1, instance_id, modifiers: defaults };
+      setOrder((prev) => [...prev, newItem]);
+      setCurrItem(newItem);
+      setCustomizing(true);
+    } catch (err) {
+      alert(err.message || "Could not load customization options.");
+    }
+  };
+
+  const removeItem = (instanceId) =>
+    setOrder((prev) => prev.filter((i) => i.instance_id !== instanceId));
+  const setQtyItem = (instanceId, delta) => {
+    const item = order.find((entry) => entry.instance_id === instanceId);
+    if (!item) return;
+    if (item.qty + delta <= 0) {
+      removeItem(instanceId);
+      if (currItem?.instance_id === instanceId) {
+        setCurrItem(null);
+        setCustomizing(false);
+      }
+      return;
+    }
+    setOrder((prev) =>
+      prev.map((entry) =>
+        entry.instance_id === instanceId ? { ...entry, qty: entry.qty + delta } : entry
+      )
+    );
+  };
+
+  const editItem = async (item) => {
+    try {
+      await ensureProductModifiers(item.product_id);
+      setCurrItem(item);
+      setCustomizing(true);
+    } catch (err) {
+      alert(err.message || "Could not load customization options.");
+    }
+  };
+
+  const closeCustomization = () => {
+    setCurrItem(null);
+    setCustomizing(false);
+  };
+
+  const toggleModifier = (modifier) => {
+    if (!currItem) return;
+    setOrder((prev) =>
+      prev.map((entry) => {
+        if (entry.instance_id !== currItem.instance_id) return entry;
+        const isTopping = modifier.category === "Topping";
+        let newModifiers = [...(entry.modifiers || [])];
+        if (isTopping) {
+          const existingIndex = newModifiers.findIndex((m) => m.option_id === modifier.option_id);
+          if (existingIndex >= 0) {
+            newModifiers.splice(existingIndex, 1);
+          } else {
+            newModifiers.push({ ...modifier, qty: 1 });
+          }
+        } else {
+          newModifiers = newModifiers.filter((m) => m.category !== modifier.category);
+          newModifiers.push({ ...modifier, qty: 1 });
+        }
+        return { ...entry, modifiers: newModifiers };
+      })
+    );
+  };
+
+  const setModifierQty = (optionId, delta) => {
+    if (!currItem) return;
+    setOrder((prev) =>
+      prev.map((entry) => {
+        if (entry.instance_id !== currItem.instance_id) return entry;
+        const idx = (entry.modifiers || []).findIndex((m) => m.option_id === optionId);
+        if (idx < 0) return entry;
+        const updated = [...entry.modifiers];
+        updated[idx] = { ...updated[idx], qty: (updated[idx].qty || 1) + delta };
+        if (updated[idx].qty <= 0) updated.splice(idx, 1);
+        return { ...entry, modifiers: updated };
+      })
+    );
+  };
   const handleSignOut = () => navigate("/");
 
   const handleLookup = async () => {
@@ -70,7 +166,9 @@ const Cashier = ({ showNav = false }) => {
           body: JSON.stringify({
             productId: item.product_id,
             quantity: item.qty,
-            modifiers: []
+            modifiers: (item.modifiers || []).flatMap((modifier) =>
+              Array(modifier.qty || 1).fill(modifier.option_id)
+            )
           })
         })
       ));
@@ -97,12 +195,21 @@ const Cashier = ({ showNav = false }) => {
     }
   };
 
-  const subtotal = order.reduce((sum, i) => sum + i.base_price * i.qty, 0);
+  const itemTotal = (item) => {
+    const mods = (item.modifiers || []).reduce(
+      (sum, modifier) =>
+        sum + Number(modifier.price_adjustment || 0) * (modifier.qty || 1),
+      0
+    );
+    return (Number(item.base_price) + mods) * item.qty;
+  };
+
+  const subtotal = order.reduce((sum, item) => sum + itemTotal(item), 0);
   
   let discount = 0;
   if (redeemVoucher && order.length > 0) {
     // Discount max item price visually before submission
-    const maxPrice = Math.max(...order.map(i => i.base_price));
+    const maxPrice = Math.max(...order.map((item) => itemTotal(item)));
     discount = maxPrice;
   }
   
@@ -114,9 +221,29 @@ const Cashier = ({ showNav = false }) => {
       <h2 className="cashier-heading">Current Order</h2>
       <div className="cashier-order-list">
         {order.map((item) => (
-          <div key={item.product_id} className="cashier-order-item">
-            <span>{item.qty}x {item.name}</span>
-            <button className="cashier-remove-btn" onClick={() => removeItem(item.product_id)}>✕</button>
+          <div key={item.instance_id} className="cashier-order-item">
+            <span>
+              {item.qty}x {item.name}
+              {item.modifiers?.length
+                ? ` (${item.modifiers
+                    .map((m) => `${m.qty > 1 ? `${m.qty}x ` : ""}${m.name}`)
+                    .join(", ")})`
+                : ""}
+            </span>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button className="cashier-remove-btn" onClick={() => setQtyItem(item.instance_id, -1)}>
+                -
+              </button>
+              <button className="cashier-remove-btn" onClick={() => setQtyItem(item.instance_id, 1)}>
+                +
+              </button>
+              <button className="cashier-remove-btn" onClick={() => editItem(item)}>
+                Edit
+              </button>
+              <button className="cashier-remove-btn" onClick={() => removeItem(item.instance_id)}>
+                ✕
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -218,6 +345,73 @@ const Cashier = ({ showNav = false }) => {
       </div>
     </div>
   );
+
+  if (customizing && currItem) {
+    return (
+      <div className="cashier-layout">
+        <div className="cashier-menu">
+          <h2 className="cashier-heading">Customize {currItem.name}</h2>
+          {["Topping", "Ice Level", "Sugar Level", "Size", "Milk Type"].map((category) => (
+            <div key={category} style={{ marginBottom: "12px" }}>
+              <h4 style={{ marginBottom: "6px" }}>{category}</h4>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {getProductModifiers(currItem.product_id)
+                  .filter((modifier) => modifier.category === category)
+                  .map((modifier) => {
+                    const selected = order
+                      .find((item) => item.instance_id === currItem.instance_id)
+                      ?.modifiers?.find((entry) => entry.option_id === modifier.option_id);
+                    return (
+                      <button
+                        key={modifier.option_id}
+                        className="cashier-category-btn"
+                        style={{ borderColor: selected ? "#333" : undefined }}
+                        onClick={() => toggleModifier(modifier)}
+                      >
+                        {modifier.name}
+                        {Number(modifier.price_adjustment) > 0
+                          ? ` (+$${Number(modifier.price_adjustment).toFixed(2)})`
+                          : ""}
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
+          <button className="cashier-submit-btn" onClick={closeCustomization}>
+            Done
+          </button>
+        </div>
+        <div className="cashier-sidebar">
+          <h2 className="cashier-heading">Selected Modifiers</h2>
+          {(order.find((item) => item.instance_id === currItem.instance_id)?.modifiers || []).map(
+            (modifier) => (
+              <div key={modifier.option_id} className="cashier-order-item">
+                <span>{modifier.name}</span>
+                {modifier.category === "Topping" ? (
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      className="cashier-remove-btn"
+                      onClick={() => setModifierQty(modifier.option_id, -1)}
+                    >
+                      -
+                    </button>
+                    <span>{modifier.qty || 1}</span>
+                    <button
+                      className="cashier-remove-btn"
+                      onClick={() => setModifierQty(modifier.option_id, 1)}
+                    >
+                      +
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return showNav ? (
     <div className="cashier-page">

@@ -78,19 +78,28 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const { name, base_price, category_name, can_be_served_hot, is_active, diet } = req.body;
+  const {
+    name,
+    base_price,
+    category_name,
+    can_be_served_hot,
+    is_active,
+    image_url,
+    diet,
+  } = req.body;
   if (!name || base_price === undefined) {
     return res.status(400).json({ error: "name and base_price are required." });
   }
   try {
     const result = await db.query(
-      "INSERT INTO product (name, base_price, category_name, can_be_served_hot, is_active, diet) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      "INSERT INTO product (name, base_price, category_name, can_be_served_hot, is_active, image_url, diet) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
       [
         name.trim(),
         Number(base_price),
         category_name || null,
         Boolean(can_be_served_hot),
         is_active !== false,
+        image_url ? String(image_url).trim() : null,
         diet || "None",
       ]
     );
@@ -105,19 +114,28 @@ router.put("/:id", async (req, res) => {
   if (!Number.isInteger(productId)) {
     return res.status(400).json({ error: "Invalid product id." });
   }
-  const { name, base_price, category_name, can_be_served_hot, is_active,diet } = req.body;
+  const {
+    name,
+    base_price,
+    category_name,
+    can_be_served_hot,
+    is_active,
+    image_url,
+    diet,
+  } = req.body;
   if (!name || base_price === undefined) {
     return res.status(400).json({ error: "name and base_price are required." });
   }
   try {
     const result = await db.query(
-      "UPDATE product SET name = $1, base_price = $2, category_name = $3, can_be_served_hot = $4, is_active = $5, diet = $6 WHERE product_id = $7 RETURNING *",
+      "UPDATE product SET name = $1, base_price = $2, category_name = $3, can_be_served_hot = $4, is_active = $5, image_url = $6, diet = $7 WHERE product_id = $8 RETURNING *",
       [
         name.trim(),
         Number(base_price),
         category_name || null,
         Boolean(can_be_served_hot),
         Boolean(is_active),
+        image_url ? String(image_url).trim() : null,
         diet || "None",
         productId,
         
@@ -172,6 +190,123 @@ router.get("/:id/modifiers", async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/:id/ingredients", async (req, res) => {
+  const productId = Number(req.params.id);
+
+  if (!Number.isInteger(productId)) {
+    return res.status(400).json({ error: "Invalid product id" });
+  }
+
+  try {
+    const result = await db.query(
+      "SELECT pi.item_id, i.item_name, pi.quantity_used, i.unit_type " +
+        "FROM productingredient pi " +
+        "JOIN inventory i ON i.item_id = pi.item_id " +
+        "WHERE pi.product_id = $1 " +
+        "ORDER BY i.item_name;",
+      [productId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put("/:id/config", async (req, res) => {
+  const productId = Number(req.params.id);
+  const { modifierOptionIds, ingredients } = req.body || {};
+
+  if (!Number.isInteger(productId)) {
+    return res.status(400).json({ error: "Invalid product id." });
+  }
+
+  if (!Array.isArray(modifierOptionIds) || !Array.isArray(ingredients)) {
+    return res.status(400).json({
+      error: "modifierOptionIds and ingredients arrays are required.",
+    });
+  }
+
+  const uniqueModifierIds = [...new Set(modifierOptionIds.map(Number))].filter((id) =>
+    Number.isInteger(id)
+  );
+  const normalizedIngredients = ingredients
+    .map((ingredient) => ({
+      itemId: Number(ingredient?.item_id),
+      quantityUsed: Number(ingredient?.quantity_used),
+    }))
+    .filter(
+      (ingredient) =>
+        Number.isInteger(ingredient.itemId) &&
+        Number.isFinite(ingredient.quantityUsed) &&
+        ingredient.quantityUsed >= 0
+    );
+
+  const client = await db.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const productCheck = await client.query(
+      "SELECT product_id FROM product WHERE product_id = $1;",
+      [productId]
+    );
+    if (productCheck.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Product not found." });
+    }
+
+    if (uniqueModifierIds.length > 0) {
+      const modifierCheck = await client.query(
+        "SELECT option_id FROM modifieroption WHERE option_id = ANY($1::int[]);",
+        [uniqueModifierIds]
+      );
+      if (modifierCheck.rowCount !== uniqueModifierIds.length) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({ error: "One or more modifiers are invalid." });
+      }
+    }
+
+    if (normalizedIngredients.length > 0) {
+      const ingredientIds = normalizedIngredients.map((ingredient) => ingredient.itemId);
+      const ingredientCheck = await client.query(
+        "SELECT item_id FROM inventory WHERE item_id = ANY($1::int[]);",
+        [ingredientIds]
+      );
+      if (ingredientCheck.rowCount !== normalizedIngredients.length) {
+        await client.query("ROLLBACK");
+        return res.status(400).json({ error: "One or more ingredients are invalid." });
+      }
+    }
+
+    await client.query("DELETE FROM productmodifier WHERE product_id = $1;", [productId]);
+    if (uniqueModifierIds.length > 0) {
+      const valuePlaceholders = uniqueModifierIds
+        .map((_, index) => `($1, $${index + 2})`)
+        .join(", ");
+      await client.query(
+        `INSERT INTO productmodifier (product_id, option_id) VALUES ${valuePlaceholders};`,
+        [productId, ...uniqueModifierIds]
+      );
+    }
+
+    await client.query("DELETE FROM productingredient WHERE product_id = $1;", [productId]);
+    for (const ingredient of normalizedIngredients) {
+      await client.query(
+        "INSERT INTO productingredient (product_id, item_id, quantity_used) VALUES ($1, $2, $3);",
+        [productId, ingredient.itemId, ingredient.quantityUsed]
+      );
+    }
+
+    await client.query("COMMIT");
+    res.json({ message: "Product configuration updated." });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
   }
 });
 
