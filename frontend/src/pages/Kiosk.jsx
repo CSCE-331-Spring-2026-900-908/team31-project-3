@@ -299,7 +299,7 @@ const Kiosk = ({ showNav = false }) => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                               <span>{m.name}</span>
                               {Number(m.price_adjustment) > 0 && (
-                                <span style={{ fontSize: '0.85rem', color: applied ? '#cbd5e1' : '#64748b', fontWeight: 600 }}>
+                                <span style={{ fontSize: '0.85rem', color: highContrast ? applied ? '#000000' : '#ffffff' : applied ? '#cbd5e1' : '#64748b', fontWeight: 600 }}>
                                   +${Number(m.price_adjustment).toFixed(2)}
                                 </span>
                               )}
@@ -346,7 +346,7 @@ const Kiosk = ({ showNav = false }) => {
                 </div>
                 {order.find(item => item.instance_id === currItem.instance_id)?.modifiers.map((modifier) => (
                   <div key={modifier.option_id} className="kiosk-order-item" style={{ padding: '8px 0', borderBottom: 'none' }}>
-                    <span className="modifier-name" style={{ color: '#475569' }}>
+                    <span className="modifier-name">
                       {modifier.qty > 1 ? `${modifier.qty}x ` : ''}{modifier.name} {Number(modifier.price_adjustment) > 0 ? `(+$${(Number(modifier.price_adjustment) * (modifier.qty || 1)).toFixed(2)})` : ''}
                     </span>
                   </div>
@@ -569,7 +569,7 @@ const Kiosk = ({ showNav = false }) => {
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="kiosk-total-row" style={{ paddingTop: '8px', borderTop: 'none', fontSize: '1rem', color: '#64748b' }}>
+              <div className="kiosk-total-row tax">
                 <span>Tax</span>
                 <span>${tax.toFixed(2)}</span>
               </div>
