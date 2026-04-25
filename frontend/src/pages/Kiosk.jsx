@@ -128,7 +128,7 @@ const Kiosk = ({ showNav = false }) => {
     setOrder((prev) => prev.map((item) => item.instance_id === currItem.instance_id ? { ...item, modifiers: item.modifiers.filter((i) => i.option_id !== option_id) } : item));
   };
 
-  const setModifierQty = (option_id, delta) => {
+  const setQtyModifier = (option_id, delta) => {
     if (currItem === null) return;
     setOrder((prev) => prev.map((item) => {
       if (item.instance_id !== currItem.instance_id) return item;
@@ -330,11 +330,11 @@ const Kiosk = ({ showNav = false }) => {
                           </button>
                           {category === 'Topping' && applied && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '8px', background: '#e2e8f0', borderRadius: '8px' }}>
-                              <button onClick={() => setModifierQty(m.option_id, -1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }} aria-label={`Decrease quantity of ${m.name}`}>-</button>
+                              <button onClick={() => setQtyModifier(m.option_id, -1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }} aria-label={`Decrease quantity of ${m.name}`}>-</button>
                               <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }} role="status" aria-label={`Quantity of ${m.name}`} aria-live="polite">
                                 {applied.qty || 1}
                               </span>
-                              <button onClick={() => setModifierQty(m.option_id, 1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }} aria-label={`Increase quantity of ${m.name}`}>+</button>
+                              <button onClick={() => setQtyModifier(m.option_id, 1)} style={{ background: '#fff', border: '1px solid #cbd5e1', borderRadius: '50%', width: '32px', height: '32px', fontSize: '1.2rem', fontWeight: 800, cursor: 'pointer' }} aria-label={`Increase quantity of ${m.name}`}>+</button>
                             </div>
                           )}
                         </div>
