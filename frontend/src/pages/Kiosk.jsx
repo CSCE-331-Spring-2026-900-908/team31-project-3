@@ -135,8 +135,11 @@ const Kiosk = ({ showNav = false }) => {
       const modIndex = item.modifiers.findIndex(m => m.option_id === option_id);
       if (modIndex === -1) return item;
       const newMods = [...item.modifiers];
-      newMods[modIndex].qty += delta;
-      if (newMods[modIndex].qty <= 0) newMods.splice(modIndex, 1);
+      const updatedMod = { ...newMods[modIndex], qty: (newMods[modIndex].qty || 1) + delta };
+      if (updatedMod.qty <= 0) newMods.splice(modIndex, 1);
+      else newMods[modIndex] = updatedMod;
+      // newMods[modIndex].qty += delta;
+      // if (newMods[modIndex].qty <= 0) newMods.splice(modIndex, 1);
       return { ...item, modifiers: newMods };
     }));
   };
