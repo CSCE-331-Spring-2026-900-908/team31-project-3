@@ -112,6 +112,30 @@
   flex-wrap: wrap;
 }
 
+/* ── Language selector ── */
+.kiosk-language-select {
+  min-height: 44px;
+  padding: 10px 12px;
+  background: var(--kiosk-surface);
+  color: var(--kiosk-ink-900);
+  border: 2px solid var(--kiosk-border);
+  border-radius: var(--kiosk-control-radius);
+  font-family: inherit;
+  font-size: var(--kiosk-font-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kiosk-language-select:hover {
+  background: var(--kiosk-brand-50);
+}
+
+.kiosk-language-select:focus-visible {
+  outline: 3px solid var(--kiosk-focus);
+  outline-offset: 2px;
+}
+
 .kiosk-accessibility-btn {
   min-height: 44px;
   padding: 10px 14px;
