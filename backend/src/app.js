@@ -15,6 +15,7 @@ const authRouter = require("./routes/auth");
 const reportsRouter = require("./routes/reports");
 const gemniAiRouter = require("./routes/gemniAi");
 const customersRouter = require("./routes/customers");
+const translateRouter = require("./routes/translate");
 
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -92,6 +93,7 @@ app.use("/auth", authRouter);
 app.use("/reports", reportsRouter);
 app.use("/gemniAi", gemniAiRouter);
 app.use("/customers", customersRouter);
+app.use("/translate", translateRouter);
 
 app.get("/proxy-image", (req, res) => {
   const url = req.query.url;
