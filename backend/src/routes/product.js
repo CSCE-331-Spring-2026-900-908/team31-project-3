@@ -29,9 +29,22 @@ router.get("/", async (req, res) => {
         p.is_active,
         p.image_url,
         p.diet,
+        CASE
+          WHEN p.is_active IS NOT TRUE THEN FALSE
+          ELSE COALESCE(av.is_available, TRUE)
+        END AS is_available,
         COALESCE(di.dietary_tags, ARRAY[]::text[]) AS dietary_tags,
         COALESCE(ai.allergen_tags, ARRAY[]::text[]) AS allergen_tags
       FROM unique_products p
+      LEFT JOIN LATERAL (
+        SELECT COALESCE(
+          BOOL_AND(i.quantity >= pi.quantity_used),
+          TRUE
+        ) AS is_available
+        FROM productingredient pi
+        JOIN inventory i ON i.item_id = pi.item_id
+        WHERE pi.product_id = p.product_id
+      ) av ON TRUE
       LEFT JOIN LATERAL (
         SELECT ARRAY_REMOVE(
           ARRAY[

@@ -429,8 +429,15 @@ const Kiosk = ({ showNav = false }) => {
                 <h2 className="kiosk-heading">{RECOMMENDED}</h2>
                 <div className="kiosk-product-grid">
                   {recommendedProducts.map((p) => (
-                    <button key={`rec-${p.product_id}`} className="kiosk-product-btn" onClick={() => addItem(p)}>
+                    <button
+                      key={`rec-${p.product_id}`}
+                      className={`kiosk-product-btn ${p.is_available === false ? "unavailable" : ""}`}
+                      onClick={() => addItem(p)}
+                      disabled={p.is_available === false}
+                      title={p.is_available === false ? "Out of stock ingredients" : ""}
+                    >
                       {p.name}
+                      {p.is_available === false ? " (Out of stock)" : ""}
                       <img 
                         src={p.image_url} 
                         alt={p.name} 
@@ -454,8 +461,15 @@ const Kiosk = ({ showNav = false }) => {
                   <h2 className="kiosk-heading">{category}</h2>
                   <div className="kiosk-product-grid">
                     {catProducts.map((p) => (
-                      <button key={p.product_id} className="kiosk-product-btn" onClick={() => addItem(p)}>
+                      <button
+                        key={p.product_id}
+                        className={`kiosk-product-btn ${p.is_available === false ? "unavailable" : ""}`}
+                        onClick={() => addItem(p)}
+                        disabled={p.is_available === false}
+                        title={p.is_available === false ? "Out of stock ingredients" : ""}
+                      >
                         {p.name}
+                        {p.is_available === false ? " (Out of stock)" : ""}
                         <img 
                           src={getProxiedImageUrl(p.image_url)} 
                           alt={p.name} 

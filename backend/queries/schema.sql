@@ -4,6 +4,8 @@ DROP TABLE IF EXISTS OrderDetail CASCADE;
 
 DROP TABLE IF EXISTS "order" CASCADE;
 
+DROP TABLE IF EXISTS Z_Report_Run CASCADE;
+
 DROP TABLE IF EXISTS ProductModifier CASCADE;
 
 DROP TABLE IF EXISTS ModifierOption CASCADE;
@@ -88,6 +90,15 @@ CREATE TABLE "order" (
     total_tax FLOAT DEFAULT 0.0,
     total_final FLOAT DEFAULT 0.0,
     z_report_run BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE Z_Report_Run (
+    business_date DATE PRIMARY KEY,
+    total_orders INTEGER NOT NULL DEFAULT 0,
+    total_sales NUMERIC(12,2) NOT NULL DEFAULT 0,
+    total_tax NUMERIC(12,2) NOT NULL DEFAULT 0,
+    report_rows JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE OrderDetail (
