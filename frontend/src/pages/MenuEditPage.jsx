@@ -719,70 +719,66 @@ const MenuEditPage = () => {
 
           {configItem ? (
             <div className="manager-modal-overlay" role="presentation">
-              <div className="manager-modal" role="dialog" aria-modal="true">
+              <div
+                className="manager-modal manager-config-modal"
+                role="dialog"
+                aria-modal="true"
+              >
                 <h3>Configure {configItem.name}</h3>
 
-                <h4>Allowed Modifiers / Toppings</h4>
-                <div style={{ maxHeight: 220, overflowY: "auto", marginBottom: 16 }}>
-                  {modifierOptions.map((option) => (
-                    <label
-                      key={option.option_id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        marginBottom: 8,
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedModifierIds.includes(option.option_id)}
-                        onChange={() => toggleModifierSelection(option.option_id)}
-                      />
-                      <span>
-                        {option.name} ({option.category || "Other"})
-                      </span>
-                    </label>
-                  ))}
-                </div>
+                <div className="manager-config-columns">
+                  <section>
+                    <h4>Allowed Modifiers / Toppings</h4>
+                    <div className="manager-config-scroll manager-config-scroll-modifiers">
+                      {modifierOptions.map((option) => (
+                        <label key={option.option_id} className="manager-config-option-row">
+                          <input
+                            type="checkbox"
+                            checked={selectedModifierIds.includes(option.option_id)}
+                            onChange={() => toggleModifierSelection(option.option_id)}
+                          />
+                          <span>
+                            {option.name} ({option.category || "Other"})
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </section>
 
-                <h4>Ingredients Used Per Drink</h4>
-                <div style={{ maxHeight: 260, overflowY: "auto", marginBottom: 16 }}>
-                  {inventoryItems.map((ingredientItem) => {
-                    const selected = selectedIngredients.find(
-                      (ingredient) => ingredient.item_id === ingredientItem.item_id
-                    );
-                    return (
-                      <div
-                        key={ingredientItem.item_id}
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "auto 1fr 120px",
-                          gap: 8,
-                          alignItems: "center",
-                          marginBottom: 8,
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={Boolean(selected)}
-                          onChange={() => toggleIngredientSelection(ingredientItem.item_id)}
-                        />
-                        <span>{ingredientItem.item_name}</span>
-                        <input
-                          className="manager-input"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          disabled={!selected}
-                          value={selected?.quantity_used || ""}
-                          onChange={(event) =>
-                            setIngredientQuantity(ingredientItem.item_id, event.target.value)
-                          }
-                        />
-                      </div>
-                    );
-                  })}
+                  <section>
+                    <h4>Ingredients Used Per Drink</h4>
+                    <div className="manager-config-scroll manager-config-scroll-ingredients">
+                      {inventoryItems.map((ingredientItem) => {
+                        const selected = selectedIngredients.find(
+                          (ingredient) => ingredient.item_id === ingredientItem.item_id
+                        );
+                        return (
+                          <div
+                            key={ingredientItem.item_id}
+                            className="manager-config-ingredient-row"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={Boolean(selected)}
+                              onChange={() => toggleIngredientSelection(ingredientItem.item_id)}
+                            />
+                            <span>{ingredientItem.item_name}</span>
+                            <input
+                              className="manager-input"
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              disabled={!selected}
+                              value={selected?.quantity_used || ""}
+                              onChange={(event) =>
+                                setIngredientQuantity(ingredientItem.item_id, event.target.value)
+                              }
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
                 </div>
 
                 <div className="manager-modal-actions">

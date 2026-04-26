@@ -338,8 +338,15 @@ const Cashier = ({ showNav = false }) => {
       </div>
       <div className="cashier-product-grid">
         {filteredProducts.map((p) => (
-          <button key={p.product_id} className="cashier-product-btn" onClick={() => addItem(p)}>
+          <button
+            key={p.product_id}
+            className={`cashier-product-btn ${p.is_available === false ? "unavailable" : ""}`}
+            onClick={() => addItem(p)}
+            disabled={p.is_available === false}
+            title={p.is_available === false ? "Out of stock ingredients" : ""}
+          >
             {p.name}
+            {p.is_available === false ? " (Out of stock)" : ""}
           </button>
         ))}
       </div>

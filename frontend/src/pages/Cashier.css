@@ -111,6 +111,15 @@
   background: #e5e7eb;
 }
 
+.cashier-product-btn.unavailable,
+.cashier-product-btn:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
 .cashier-sidebar {
   flex: 0 0 320px;
   align-self: stretch;
