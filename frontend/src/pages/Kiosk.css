@@ -255,11 +255,24 @@
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+  flex: 1;
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kiosk-border) transparent;
 }
 
 .kiosk-category-scroll::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.kiosk-category-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kiosk-category-scroll::-webkit-scrollbar-thumb {
+  background: var(--kiosk-border);
+  border-radius: 4px;
 }
 
 .kiosk-category-btn {
