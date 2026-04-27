@@ -10,15 +10,14 @@ import useTranslation, { LANGUAGES } from "../hooks/useTranslation";
 const API = API_BASE_URL;
 
 const RECOMMENDED = "Recommended Based On Weather";
-const categories = [
+const BASE_CATEGORIES = [
   "Milk Foam Series",
   "Milk Tea Series",
   "Creative Mix Series",
   "Brewed Tea Series",
   "Coffee Series",
   "Slush Series",
-  "Seasonal Series",
-  "Hot Drinks"
+  "Hot Drinks",
 ];
 
 const Kiosk = ({ showNav = false }) => {
@@ -27,6 +26,13 @@ const Kiosk = ({ showNav = false }) => {
   const [products, setProducts] = useState([]);
   const [productModifiersByProductId, setProductModifiersByProductId] = useState({});
   const [order, setOrder] = useState([]);
+
+  const categories = useMemo(() => {
+    const dynamic = products.flatMap((p) => p.categories || []);
+    const uniqueDynamic = [...new Set(dynamic)].filter((c) => !BASE_CATEGORIES.includes(c) && c);
+    return [...BASE_CATEGORIES, ...uniqueDynamic];
+  }, [products]);
+
   const [selectedCategory, setSelectedCategory] = useState(RECOMMENDED);
   const [weatherData, setWeatherData] = useState(null);
   const [rewardsEmail, setRewardsEmail] = useState("");
@@ -668,10 +674,7 @@ const Kiosk = ({ showNav = false }) => {
             )}
 
             {categories.map((category) => {
-              const catProducts =
-                category === "Hot Drinks"
-                  ? products.filter((p) => p.can_be_served_hot === true)
-                  : products.filter((p) => p.category_name === category);
+              const catProducts = products.filter((p) => p.categories?.includes(category));
               if (catProducts.length === 0) return null;
               const isHotDrinksCategory = category === "Hot Drinks";
               const visibleProducts =

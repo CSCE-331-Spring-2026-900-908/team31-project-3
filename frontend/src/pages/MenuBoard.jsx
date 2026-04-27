@@ -38,7 +38,7 @@ const MenuBoard = () => {
     const deduped = new Map();
 
     categoryProducts.forEach((product) => {
-      const key = `${String(product.name || "").trim().toLowerCase()}|${Number(product.base_price).toFixed(2)}|${String(product.category_name || "").trim().toLowerCase()}`;
+      const key = `${String(product.name || "").trim().toLowerCase()}|${Number(product.base_price).toFixed(2)}|${(product.categories || []).sort().join(",")}`;
       const existing = deduped.get(key);
 
       if (!existing) {
@@ -93,7 +93,7 @@ const MenuBoard = () => {
   }, []);
 
   // Dynamically extract categories from products
-  const categories = [...new Set(products.map((p) => p.category_name))].filter(Boolean).sort();
+  const categories = [...new Set(products.flatMap((p) => p.categories || []))].filter(Boolean).sort();
   const allDedupedProducts = dedupeProducts(products);
 
   const toppingItems = productModifiers.filter((modifier) =>
@@ -101,7 +101,7 @@ const MenuBoard = () => {
   );
 
   const menuSections = categories.map((category) => {
-    const dedupedCategoryProducts = allDedupedProducts.filter((p) => p.category_name === category);
+    const dedupedCategoryProducts = allDedupedProducts.filter((p) => p.categories?.includes(category));
 
     return {
       key: category,

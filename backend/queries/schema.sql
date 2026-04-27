@@ -50,7 +50,7 @@ CREATE TABLE Product (
     product_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     base_price FLOAT NOT NULL,
-    category_name VARCHAR(50),
+    categories TEXT[] DEFAULT '{}',
     can_be_served_hot BOOLEAN NOT NULL DEFAULT FALSE,
     color_code VARCHAR(20),
     description TEXT,

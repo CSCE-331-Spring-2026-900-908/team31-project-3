@@ -42,9 +42,11 @@ const OrdersPage = ({ cashierMode = false }) => {
   const grouped = useMemo(() => {
     const map = new Map();
     for (const p of products) {
-      const cat = p.category_name || "Other";
-      if (!map.has(cat)) map.set(cat, []);
-      map.get(cat).push(p);
+      const cats = p.categories?.length > 0 ? p.categories : ["Other"];
+      for (const cat of cats) {
+        if (!map.has(cat)) map.set(cat, []);
+        map.get(cat).push(p);
+      }
     }
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [products]);

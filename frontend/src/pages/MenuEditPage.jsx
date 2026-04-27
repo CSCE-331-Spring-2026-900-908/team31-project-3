@@ -86,7 +86,7 @@ const MenuEditPage = () => {
     return menuItems.filter(
       (item) =>
         String(item.name || "").toLowerCase().includes(query) ||
-        String(item.category_name || "").toLowerCase().includes(query)
+        (item.categories || []).some(cat => cat.toLowerCase().includes(query))
     );
   }, [menuItems, search]);
 
@@ -112,7 +112,7 @@ const MenuEditPage = () => {
         body: JSON.stringify({
           name: trimmedName,
           base_price: parsedPrice,
-          category_name: newCategory.trim() || null,
+          categories: newCategory.split(',').map(c => c.trim()).filter(Boolean),
           image_url: newImageUrl.trim() || null,
           can_be_served_hot: newCanBeServedHot,
           is_active: newActive,
@@ -139,7 +139,7 @@ const MenuEditPage = () => {
   const startEdit = (item) => {
     setEditingId(item.product_id);
     setEditName(item.name || "");
-    setEditCategory(item.category_name || "");
+    setEditCategory((item.categories || []).join(", "));
     setEditPrice(String(item.base_price ?? ""));
     setEditImageUrl(item.image_url || "");
     setEditCanBeServedHot(item.can_be_served_hot === true);
@@ -180,7 +180,7 @@ const MenuEditPage = () => {
         body: JSON.stringify({
           name: trimmedName,
           base_price: parsedPrice,
-          category_name: editCategory.trim() || null,
+          categories: editCategory.split(',').map(c => c.trim()).filter(Boolean),
           image_url: editImageUrl.trim() || null,
           can_be_served_hot: editCanBeServedHot,
           is_active: editActive,
@@ -420,7 +420,7 @@ const MenuEditPage = () => {
                             onChange={(e) => setEditCategory(e.target.value)}
                           />
                         ) : (
-                          item.category_name || <span className="manager-muted">—</span>
+                          (item.categories && item.categories.length > 0) ? item.categories.join(", ") : <span className="manager-muted">—</span>
                         )}
                       </td>
                       <td>

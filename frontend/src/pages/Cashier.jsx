@@ -359,10 +359,10 @@ const Cashier = ({ showNav = false }) => {
     </>
   );
 
-  const categories = ["All", ...new Set(products.map(p => p.category_name).filter(Boolean))];
+  const categories = ["All", ...new Set(products.flatMap(p => p.categories || []).filter(Boolean))];
   const filteredProducts = activeCategory === "All" 
     ? products 
-    : products.filter(p => p.category_name === activeCategory);
+    : products.filter(p => p.categories?.includes(activeCategory));
 
   const MenuContent = (
     <div className="cashier-menu">

@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
           product_id,
           name,
           base_price,
-          category_name,
+          categories,
           can_be_served_hot,
           is_active,
           image_url,
@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
         p.product_id,
         p.name,
         p.base_price,
-        p.category_name,
+        p.categories,
         p.can_be_served_hot,
         p.is_active,
         p.image_url,
@@ -94,7 +94,7 @@ router.post("/", async (req, res) => {
   const {
     name,
     base_price,
-    category_name,
+    categories,
     can_be_served_hot,
     is_active,
     image_url,
@@ -105,11 +105,11 @@ router.post("/", async (req, res) => {
   }
   try {
     const result = await db.query(
-      "INSERT INTO product (name, base_price, category_name, can_be_served_hot, is_active, image_url, diet) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      "INSERT INTO product (name, base_price, categories, can_be_served_hot, is_active, image_url, diet) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
       [
         name.trim(),
         Number(base_price),
-        category_name || null,
+        Array.isArray(categories) ? categories : [],
         Boolean(can_be_served_hot),
         is_active !== false,
         image_url ? String(image_url).trim() : null,
@@ -130,7 +130,7 @@ router.put("/:id", async (req, res) => {
   const {
     name,
     base_price,
-    category_name,
+    categories,
     can_be_served_hot,
     is_active,
     image_url,
@@ -141,11 +141,11 @@ router.put("/:id", async (req, res) => {
   }
   try {
     const result = await db.query(
-      "UPDATE product SET name = $1, base_price = $2, category_name = $3, can_be_served_hot = $4, is_active = $5, image_url = $6, diet = $7 WHERE product_id = $8 RETURNING *",
+      "UPDATE product SET name = $1, base_price = $2, categories = $3, can_be_served_hot = $4, is_active = $5, image_url = $6, diet = $7 WHERE product_id = $8 RETURNING *",
       [
         name.trim(),
         Number(base_price),
-        category_name || null,
+        Array.isArray(categories) ? categories : [],
         Boolean(can_be_served_hot),
         Boolean(is_active),
         image_url ? String(image_url).trim() : null,
