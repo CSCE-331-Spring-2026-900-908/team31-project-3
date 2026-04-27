@@ -9,7 +9,7 @@ import dairy_icon from "../assets/Dairyicon.png";
 const API = API_BASE_URL;
 
 const RECOMMENDED = "Recommended Based On Weather";
-const categories = ["Milk Foam Series", "Milk Tea Series", "Creative Mix Series", "Brewed Tea Series", "Coffee Series", "Slush Series"];
+const categories = ["Milk Foam Series", "Milk Tea Series", "Creative Mix Series", "Brewed Tea Series", "Coffee Series", "Slush Series", "Seasonal Series"];
 
 const Kiosk = ({ showNav = false }) => {
   const [customizing, setCustomizing] = useState(false);
