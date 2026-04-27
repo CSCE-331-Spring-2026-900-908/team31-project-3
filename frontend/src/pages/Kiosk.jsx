@@ -31,6 +31,12 @@ const sortModifiersArray = (modifiers) => {
     return a.name.localeCompare(b.name);
   });
 };
+
+const formatBasePrice = (price) => {
+  const value = Number(price);
+  if (!Number.isFinite(value)) return "";
+  return `$${value.toFixed(2)}+`;
+};
 const BASE_CATEGORIES = [
   "Milk Foam Series",
   "Milk Tea Series",
@@ -684,6 +690,9 @@ const Kiosk = ({ showNav = false }) => {
                       title={p.is_available === false ? "Out of stock ingredients" : ""}
                     >
                       {t(p.name)}
+                      <span className="kiosk-product-base-price">
+                        {formatBasePrice(p.base_price)}
+                      </span>
                       <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
                       {p.diet === "Vegan" && <img className="dietImg" src={vegan_icon} alt="Vegan" />}
                       {p.diet === "Dairy" && <img className="dietImg" src={dairy_icon} alt="Dairy" />}
@@ -721,6 +730,9 @@ const Kiosk = ({ showNav = false }) => {
                         title={p.is_available === false ? "Out of stock ingredients" : ""}
                       >
                         {t(p.name)}
+                        <span className="kiosk-product-base-price">
+                          {formatBasePrice(p.base_price)}
+                        </span>
                         {p.is_available === false ? ` (${t("Out of stock")})` : ""}
                         <img
                           src={getProxiedImageUrl(p.image_url)}
