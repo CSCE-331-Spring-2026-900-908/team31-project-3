@@ -571,6 +571,11 @@ const Kiosk = ({ showNav = false }) => {
               <h2 className="kiosk-heading">
                 {currItem.name} {t("Details")}
               </h2>
+              <div className="kiosk-customize-price" aria-live="polite">
+                {t("Current Total")}: ${itemTotal(
+                  order.find((item) => item.instance_id === currItem.instance_id) || currItem
+                ).toFixed(2)}
+              </div>
               <div className="kiosk-order-list">
                 <div className="kiosk-order-item cart-item" style={{ marginBottom: "16px" }}>
                   <div className="cart-item-header">

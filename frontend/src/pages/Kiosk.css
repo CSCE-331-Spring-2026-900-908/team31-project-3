@@ -451,6 +451,13 @@
   border-radius: 12px;
 }
 
+.kiosk-customize-price {
+  margin: -6px 0 12px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--kiosk-brand-700);
+}
+
 .kiosk-page--large-ui .kiosk-product-image {
   margin-top: 16px;
 }
