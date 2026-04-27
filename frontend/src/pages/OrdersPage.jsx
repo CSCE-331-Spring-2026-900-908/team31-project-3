@@ -8,6 +8,27 @@ const MANAGER_TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
 const SINGLE_SELECT_CATS = ["Ice Level", "Sugar Level", "Size", "Milk Type"];
 const MODIFIER_CAT_ORDER = ["Size", "Ice Level", "Sugar Level", "Milk Type", "Topping"];
 
+const MODIFIER_ITEM_ORDER = [
+  "small", "medium", "large", "extra large",
+  "no ice", "less ice", "regular", "regular ice", "extra ice",
+  "0% sugar", "30% sugar", "50% sugar", "70% sugar", "100% sugar", "120% sugar",
+  "whole milk", "oat milk", "almond milk", "soy milk"
+];
+
+const sortModifiersArray = (modifiers) => {
+  return [...modifiers].sort((a, b) => {
+    const nameA = String(a.name || "").toLowerCase().trim();
+    const nameB = String(b.name || "").toLowerCase().trim();
+    const rankA = MODIFIER_ITEM_ORDER.indexOf(nameA);
+    const rankB = MODIFIER_ITEM_ORDER.indexOf(nameB);
+    const costA = rankA === -1 ? 999 : rankA;
+    const costB = rankB === -1 ? 999 : rankB;
+
+    if (costA !== costB) return costA - costB;
+    return a.name.localeCompare(b.name);
+  });
+};
+
 const OrdersPage = ({ cashierMode = false }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -35,7 +56,10 @@ const OrdersPage = ({ cashierMode = false }) => {
 
     fetch(`${API_BASE_URL}/productmodifier`)
       .then((r) => r.json())
-      .then((data) => setModifiers(Array.isArray(data) ? data : []))
+      .then((data) => {
+        const mods = Array.isArray(data) ? data : [];
+        setModifiers(sortModifiersArray(mods));
+      })
       .catch(console.error);
   }, []);
 

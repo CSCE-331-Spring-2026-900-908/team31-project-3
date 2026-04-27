@@ -268,6 +268,22 @@ const MenuEditPage = () => {
     );
   };
 
+  const toggleModifierGroup = (category) => {
+    const groupMods = modifierOptions.filter((o) => (o.category || "Other") === category);
+    const groupOptionIds = groupMods.map((o) => o.option_id);
+    const allSelected = groupOptionIds.every((id) => selectedModifierIds.includes(id));
+
+    if (allSelected) {
+      setSelectedModifierIds((prev) => prev.filter((id) => !groupOptionIds.includes(id)));
+    } else {
+      setSelectedModifierIds((prev) => {
+        const newSet = new Set(prev);
+        groupOptionIds.forEach((id) => newSet.add(id));
+        return Array.from(newSet);
+      });
+    }
+  };
+
   const toggleIngredientSelection = (itemId) => {
     setSelectedIngredients((prev) => {
       const existing = prev.find((ingredient) => ingredient.item_id === itemId);
@@ -730,18 +746,37 @@ const MenuEditPage = () => {
                   <section>
                     <h4>Allowed Modifiers / Toppings</h4>
                     <div className="manager-config-scroll manager-config-scroll-modifiers">
-                      {modifierOptions.map((option) => (
-                        <label key={option.option_id} className="manager-config-option-row">
-                          <input
-                            type="checkbox"
-                            checked={selectedModifierIds.includes(option.option_id)}
-                            onChange={() => toggleModifierSelection(option.option_id)}
-                          />
-                          <span>
-                            {option.name} ({option.category || "Other"})
-                          </span>
-                        </label>
-                      ))}
+                      {[...new Set(modifierOptions.map(o => o.category || "Other"))].sort().map(cat => {
+                        const catOptions = modifierOptions.filter(o => (o.category || "Other") === cat);
+                        const allSelected = catOptions.every(o => selectedModifierIds.includes(o.option_id));
+                        return (
+                          <div key={cat} className="manager-config-modifier-group" style={{ marginBottom: "16px" }}>
+                            <div className="manager-config-modifier-group-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                              <h5 style={{ margin: 0, fontSize: "1rem" }}>{cat}</h5>
+                              <button 
+                                type="button" 
+                                className="manager-small-btn"
+                                onClick={() => toggleModifierGroup(cat)}
+                                style={{ fontSize: "0.75rem", padding: "4px 8px" }}
+                              >
+                                {allSelected ? "Deselect All" : "Select All"}
+                              </button>
+                            </div>
+                            <div style={{ paddingLeft: "10px" }}>
+                              {catOptions.map((option) => (
+                                <label key={option.option_id} className="manager-config-option-row">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedModifierIds.includes(option.option_id)}
+                                    onChange={() => toggleModifierSelection(option.option_id)}
+                                  />
+                                  <span>{option.name}</span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
 

@@ -3,6 +3,27 @@ import { useNavigate } from "react-router-dom";
 import "./Cashier.css";
 import API_BASE_URL from "../config/apiBaseUrl";
 
+const MODIFIER_ITEM_ORDER = [
+  "small", "medium", "large", "extra large",
+  "no ice", "less ice", "regular", "regular ice", "extra ice",
+  "0% sugar", "30% sugar", "50% sugar", "70% sugar", "100% sugar", "130% sugar",
+  "whole milk", "oat milk", "almond milk", "soy milk"
+];
+
+const sortModifiersArray = (modifiers) => {
+  return [...modifiers].sort((a, b) => {
+    const nameA = String(a.name || "").toLowerCase().trim();
+    const nameB = String(b.name || "").toLowerCase().trim();
+    const rankA = MODIFIER_ITEM_ORDER.indexOf(nameA);
+    const rankB = MODIFIER_ITEM_ORDER.indexOf(nameB);
+    const costA = rankA === -1 ? 999 : rankA;
+    const costB = rankB === -1 ? 999 : rankB;
+
+    if (costA !== costB) return costA - costB;
+    return a.name.localeCompare(b.name);
+  });
+};
+
 const Cashier = ({ showNav = false }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -35,7 +56,7 @@ const Cashier = ({ showNav = false }) => {
     if (!response.ok) {
       throw new Error(data.error || "Failed to load modifiers.");
     }
-    const modifiers = Array.isArray(data) ? data : [];
+    const modifiers = sortModifiersArray(Array.isArray(data) ? data : []);
     setProductModifiersByProductId((prev) => ({ ...prev, [productId]: modifiers }));
     return modifiers;
   };

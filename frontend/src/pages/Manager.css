@@ -262,7 +262,10 @@
 }
 
 .manager-config-modal {
-  width: min(980px, 100%);
+  width: min(1200px, 95vw);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .manager-modal h3 {
@@ -309,11 +312,11 @@
 }
 
 .manager-config-scroll-modifiers {
-  max-height: 320px;
+  height: 55vh;
 }
 
 .manager-config-scroll-ingredients {
-  max-height: 320px;
+  height: 55vh;
 }
 
 .manager-config-option-row {
