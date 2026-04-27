@@ -737,6 +737,27 @@
   border-top: 2px dashed var(--kiosk-brand-200);
 }
 
+.kiosk-checkout-confirmation {
+  border: 1px solid var(--kiosk-brand-200);
+  background: var(--kiosk-brand-50);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--kiosk-ink-900);
+  box-shadow: 0 6px 16px var(--kiosk-shadow);
+}
+
+.kiosk-checkout-title {
+  font-weight: 800;
+  color: var(--kiosk-brand-700);
+  margin-bottom: 4px;
+}
+
+.kiosk-checkout-body {
+  font-size: var(--kiosk-font-sm);
+  color: var(--kiosk-ink-700);
+  line-height: 1.4;
+}
+
 .kiosk-total-row {
   display: flex;
   justify-content: space-between;

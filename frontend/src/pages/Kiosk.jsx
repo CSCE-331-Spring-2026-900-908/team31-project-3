@@ -34,6 +34,7 @@ const Kiosk = ({ showNav = false }) => {
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeUI, setLargeUI] = useState(false);
+  const [checkoutNotice, setCheckoutNotice] = useState(null);
 
   const { language, changeLanguage, t, translateDynamic } = useTranslation();
 
@@ -91,6 +92,8 @@ const Kiosk = ({ showNav = false }) => {
     const shuffled = [...filtered].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, 5);
   }, [products, weatherData]);
+
+  const createOrderNumber = () => Math.floor(100 + Math.random() * 900);
 
   const addItem = async (product) => {
     try {
@@ -222,6 +225,9 @@ const Kiosk = ({ showNav = false }) => {
   const placeOrder = async () => {
     if (order.length === 0) return;
     try {
+      const orderNumber = createOrderNumber();
+      const pointsEarned = Math.max(0, Math.floor(subtotal - discount));
+      const rewardsTarget = linkedCustomer?.name ? `${linkedCustomer.name}'s` : t("your");
       const payload = {
         employeeId: 1,
         customerId: linkedCustomer?.id || null,
@@ -242,13 +248,18 @@ const Kiosk = ({ showNav = false }) => {
       });
 
       if (!res.ok) throw new Error("Bulk submission failed");
-
+      setCheckoutNotice({
+        orderNumber,
+        pointsEarned,
+        rewardsTarget,
+      });
       setOrder([]);
       setLinkedCustomer(null);
       setRewardsEmail("");
       setRedeemVoucher(false);
       setLookupMessage("");
       setRewardsOpen(false);
+      window.setTimeout(() => setCheckoutNotice(null), 8000);
     } catch (err) {
       console.error(err);
       alert("Error submitting order.");
@@ -830,6 +841,16 @@ const Kiosk = ({ showNav = false }) => {
               )}
             </div>
             <div className="kiosk-pinned">
+              {checkoutNotice && (
+                <div className="kiosk-checkout-confirmation" role="status" aria-live="polite">
+                  <div className="kiosk-checkout-title">{t("Checkout complete!")}</div>
+                  <div className="kiosk-checkout-body">
+                    {t("Order")} #{checkoutNotice.orderNumber}. {t("You earned")}{" "}
+                    {checkoutNotice.pointsEarned} {t("pts")} {t("to")}{" "}
+                    {checkoutNotice.rewardsTarget} {t("rewards account")}.
+                  </div>
+                </div>
+              )}
               {discount > 0 && (
                 <div
                   className="kiosk-total-row"
