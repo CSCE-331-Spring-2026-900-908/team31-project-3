@@ -305,34 +305,44 @@ const Kiosk = ({ showNav = false }) => {
 
   const accessibilityBar = (
     <div className="kiosk-accessibility-controls" aria-label="Accessibility settings">
-      <button
-        type="button"
-        className={`kiosk-accessibility-btn ${highContrast ? "active" : ""}`}
-        onClick={() => setHighContrast((v) => !v)}
-        aria-pressed={highContrast}
-      >
-        {highContrast ? t("High Contrast: On") : t("High Contrast: Off")}
-      </button>
-      <button
-        type="button"
-        className={`kiosk-accessibility-btn ${largeUI ? "active" : ""}`}
-        onClick={() => setLargeUI((v) => !v)}
-        aria-pressed={largeUI}
-      >
-        {largeUI ? t("Large UI: On") : t("Large UI: Off")}
-      </button>
-      <select
-        className="kiosk-language-select"
-        value={language}
-        onChange={(e) => changeLanguage(e.target.value)}
-        aria-label="Select language"
-      >
-        {LANGUAGES.map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.name}
-          </option>
-        ))}
-      </select>
+      {weatherData && (
+        <div className="kiosk-weather-widget--bar">
+          <img src={weatherData.icon} alt="Weather icon" />
+          <span className="kiosk-weather-bar-text">
+            {weatherData.temp}°F — {weatherData.description}
+          </span>
+        </div>
+      )}
+      <div className="kiosk-accessibility-right">
+        <button
+          type="button"
+          className={`kiosk-accessibility-btn ${highContrast ? "active" : ""}`}
+          onClick={() => setHighContrast((v) => !v)}
+          aria-pressed={highContrast}
+        >
+          {highContrast ? t("High Contrast: On") : t("High Contrast: Off")}
+        </button>
+        <button
+          type="button"
+          className={`kiosk-accessibility-btn ${largeUI ? "active" : ""}`}
+          onClick={() => setLargeUI((v) => !v)}
+          aria-pressed={largeUI}
+        >
+          {largeUI ? t("Large UI: On") : t("Large UI: Off")}
+        </button>
+        <select
+          className="kiosk-language-select"
+          value={language}
+          onChange={(e) => changeLanguage(e.target.value)}
+          aria-label="Select language"
+        >
+          {LANGUAGES.map((lang) => (
+            <option key={lang.code} value={lang.code}>
+              {lang.name}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 
@@ -351,7 +361,6 @@ const Kiosk = ({ showNav = false }) => {
             <h2 className="kiosk-heading">
               {t("Customizing:")} {currItem.name}
             </h2>
-            <WeatherWidget />
           </div>
           <div className="kiosk-display-layout">
             <div className="kiosk-menu" aria-label="Customization options">
@@ -562,7 +571,6 @@ const Kiosk = ({ showNav = false }) => {
               </button>
             ))}
           </div>
-          <WeatherWidget />
         </div>
 
         <div className="kiosk-display-layout">

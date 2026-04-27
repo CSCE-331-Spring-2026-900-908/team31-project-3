@@ -108,8 +108,44 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
   flex-wrap: wrap;
+  width: 100%;
+  padding: 6px 16px;
+  box-sizing: border-box;
+}
+
+.kiosk-weather-widget--bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: var(--kiosk-surface);
+  border: 2px solid var(--kiosk-border);
+  border-radius: var(--kiosk-control-radius);
+  font-family: inherit;
+}
+
+.kiosk-weather-widget--bar img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.kiosk-weather-bar-text {
+  color: var(--kiosk-ink-900);
+  font-size: var(--kiosk-font-sm);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.kiosk-accessibility-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
 /* ── Language selector ── */
