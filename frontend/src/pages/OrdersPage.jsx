@@ -261,10 +261,15 @@ const OrdersPage = ({ cashierMode = false }) => {
               .map((p) => (
                 <button
                   key={p.product_id}
-                  className="orders-product-btn"
+                  className={`orders-product-btn ${p.is_available === false ? "unavailable" : ""}`}
                   onClick={() => addItem(p)}
+                  disabled={p.is_available === false}
+                  title={p.is_available === false ? "Out of stock ingredients" : ""}
                 >
                   <span className="orders-product-name">{p.name}</span>
+                  {p.is_available === false ? (
+                    <span className="orders-product-price">Out of stock</span>
+                  ) : null}
                   <span className="orders-product-price">
                     ${Number(p.base_price).toFixed(2)}
                   </span>

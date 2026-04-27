@@ -19,7 +19,7 @@ const Manager = () => {
     if (requestedTab && TAB_ROUTES[requestedTab]) {
       navigate(TAB_ROUTES[requestedTab], { replace: true });
     } else if (!requestedTab) {
-      navigate("/orders", { replace: true });
+      navigate("/reports", { replace: true });
     }
   }, [location.search, navigate]);
 

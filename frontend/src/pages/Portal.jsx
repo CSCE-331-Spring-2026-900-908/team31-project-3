@@ -36,7 +36,7 @@ return(
       )}
    
     <div style={styles.container}>
-    <h1 style={styles.heading}>BOBA INDEX MENU</h1>
+    <h1 style={styles.heading}>Project 3 Portal</h1>
     <div style={styles.grid}>
       {views.map(({ label, path, desc }) => (
         <Link key={path} to={path} style={styles.card}>

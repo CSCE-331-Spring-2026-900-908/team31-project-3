@@ -21,6 +21,7 @@ const MANAGER_TABS = ["Orders", "Menu", "Employees", "Inventory", "Reports"];
 
 const REPORTS = [
   "Inventory Status",
+  "Restock Report",
   "Most Popular Modifiers",
   "Orders by Day of Week",
   "Revenue Over Time",
@@ -33,6 +34,12 @@ const REPORTS = [
   "X-Report",
   "Z-Report",
 ];
+const REPORTS_WITHOUT_DATE_RANGE = new Set([
+  "Inventory Status",
+  "Restock Report",
+  "X-Report",
+  "Z-Report",
+]);
 
 const FALLBACK_RESPONSE = {
   columns: ["Modifier", "Times Ordered"],
@@ -69,6 +76,9 @@ const ReportsPage = () => {
   const [reportData, setReportData] = useState(FALLBACK_RESPONSE);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
+  const [runningZReport, setRunningZReport] = useState(false);
+  const reportUsesDateRange = !REPORTS_WITHOUT_DATE_RANGE.has(activeReport);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -76,11 +86,12 @@ const ReportsPage = () => {
     const loadReport = async () => {
       setLoading(true);
       setError("");
+      setActionMessage("");
 
       try {
         const params = new URLSearchParams({
           report: activeReport,
-          range: toRangeParam(activeRange),
+          range: reportUsesDateRange ? toRangeParam(activeRange) : "month",
         });
 
         const response = await fetch(`${API_BASE_URL}/reports?${params}`, {
@@ -110,7 +121,7 @@ const ReportsPage = () => {
 
     loadReport();
     return () => controller.abort();
-  }, [activeReport, activeRange]);
+  }, [activeReport, activeRange, reportUsesDateRange]);
 
   const chartData = reportData.chart || [];
   const chartRows = useMemo(
@@ -148,6 +159,31 @@ const ReportsPage = () => {
     if (tab === "Reports") return;
     const params = new URLSearchParams({ tab });
     navigate(`/manager?${params.toString()}`);
+  };
+
+  const runZReport = async () => {
+    setRunningZReport(true);
+    setError("");
+    setActionMessage("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/reports/z-report/run`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to run Z-Report.");
+      }
+      setReportData({
+        columns: data.columns || [],
+        rows: data.rows || [],
+        chart: data.chart || [],
+      });
+      setActionMessage(data.message || "Z-Report run completed.");
+    } catch (err) {
+      setError(err.message || "Failed to run Z-Report.");
+    } finally {
+      setRunningZReport(false);
+    }
   };
 
   return (
@@ -197,13 +233,16 @@ const ReportsPage = () => {
 
             <div className="reports-header">
               <h3>Date Range:</h3>
-              <div className="filter-group">
+              <div
+                className={`filter-group ${reportUsesDateRange ? "" : "disabled"}`.trim()}
+              >
                 {DATE_RANGES.map((range) => (
                   <button
                     key={range}
                     type="button"
                     className={`chip ${activeRange === range ? "active" : ""}`}
                     onClick={() => setActiveRange(range)}
+                    disabled={!reportUsesDateRange}
                   >
                     {range}
                   </button>
@@ -227,7 +266,20 @@ const ReportsPage = () => {
             </div>
 
             <h2 className="report-title">{activeReport}</h2>
+            {activeReport === "Z-Report" ? (
+              <div className="reports-header" style={{ marginBottom: 8 }}>
+                <button
+                  type="button"
+                  className="chip active"
+                  onClick={runZReport}
+                  disabled={runningZReport}
+                >
+                  {runningZReport ? "Running Z-Report..." : "Run End-of-Day Z-Report"}
+                </button>
+              </div>
+            ) : null}
             {loading ? <p className="report-state">Loading report...</p> : null}
+            {actionMessage ? <p className="report-state">{actionMessage}</p> : null}
             {error ? <p className="report-state warning">{error}</p> : null}
 
             {activeViewMode !== "Table Only" ? (

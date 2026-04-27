@@ -108,8 +108,68 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
   flex-wrap: wrap;
+  width: 100%;
+  padding: 6px 16px;
+  box-sizing: border-box;
+}
+
+.kiosk-weather-widget--bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  background: var(--kiosk-surface);
+  border: 2px solid var(--kiosk-border);
+  border-radius: var(--kiosk-control-radius);
+  font-family: inherit;
+}
+
+.kiosk-weather-widget--bar img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  flex-shrink: 0;
+}
+
+.kiosk-weather-bar-text {
+  color: var(--kiosk-ink-900);
+  font-size: var(--kiosk-font-sm);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.kiosk-accessibility-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ── Language selector ── */
+.kiosk-language-select {
+  min-height: 44px;
+  padding: 10px 12px;
+  background: var(--kiosk-surface);
+  color: var(--kiosk-ink-900);
+  border: 2px solid var(--kiosk-border);
+  border-radius: var(--kiosk-control-radius);
+  font-family: inherit;
+  font-size: var(--kiosk-font-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.kiosk-language-select:hover {
+  background: var(--kiosk-brand-50);
+}
+
+.kiosk-language-select:focus-visible {
+  outline: 3px solid var(--kiosk-focus);
+  outline-offset: 2px;
 }
 
 .kiosk-accessibility-btn {
@@ -195,11 +255,24 @@
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding-bottom: 6px;
+  flex: 1;
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kiosk-border) transparent;
 }
 
 .kiosk-category-scroll::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+
+.kiosk-category-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kiosk-category-scroll::-webkit-scrollbar-thumb {
+  background: var(--kiosk-border);
+  border-radius: 4px;
 }
 
 .kiosk-category-btn {
@@ -339,6 +412,15 @@
 
 .kiosk-product-btn:active {
   background: var(--kiosk-brand-100);
+}
+
+.kiosk-product-btn.unavailable,
+.kiosk-product-btn:disabled {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.75;
 }
 
 .kiosk-product-btn.applied {
@@ -653,6 +735,27 @@
   gap: 16px;
   padding-top: 16px;
   border-top: 2px dashed var(--kiosk-brand-200);
+}
+
+.kiosk-checkout-confirmation {
+  border: 1px solid var(--kiosk-brand-200);
+  background: var(--kiosk-brand-50);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--kiosk-ink-900);
+  box-shadow: 0 6px 16px var(--kiosk-shadow);
+}
+
+.kiosk-checkout-title {
+  font-weight: 800;
+  color: var(--kiosk-brand-700);
+  margin-bottom: 4px;
+}
+
+.kiosk-checkout-body {
+  font-size: var(--kiosk-font-sm);
+  color: var(--kiosk-ink-700);
+  line-height: 1.4;
 }
 
 .kiosk-total-row {
