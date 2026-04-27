@@ -10,6 +10,28 @@ const MODIFIER_ITEM_ORDER = [
   "whole milk", "oat milk", "almond milk", "soy milk"
 ];
 
+const MODIFIER_CATEGORY_ORDER = ["Size", "Ice Level", "Sugar Level", "Milk Type", "Topping"];
+
+const sortModifierCategories = (modifiers) => {
+  const categories = [...new Set(modifiers.map((modifier) => modifier.category).filter(Boolean))];
+  return categories.sort((a, b) => {
+    const rankA = MODIFIER_CATEGORY_ORDER.indexOf(a);
+    const rankB = MODIFIER_CATEGORY_ORDER.indexOf(b);
+    const scoreA = rankA === -1 ? 999 : rankA;
+    const scoreB = rankB === -1 ? 999 : rankB;
+    if (scoreA !== scoreB) return scoreA - scoreB;
+    return a.localeCompare(b);
+  });
+};
+
+const normalizeOptionId = (optionId) => String(optionId);
+
+const isDefaultModifier = (modifier) => {
+  const value = modifier?.is_default;
+  if (value === true || value === 1 || value === "1" || value === "t") return true;
+  return String(value || "").toLowerCase() === "true";
+};
+
 const sortModifiersArray = (modifiers) => {
   return [...modifiers].sort((a, b) => {
     const nameA = String(a.name || "").toLowerCase().trim();
@@ -56,7 +78,15 @@ const Cashier = ({ showNav = false }) => {
     if (!response.ok) {
       throw new Error(data.error || "Failed to load modifiers.");
     }
-    const modifiers = sortModifiersArray(Array.isArray(data) ? data : []);
+    const rawModifiers = Array.isArray(data) ? data : [];
+    // Deduplicate modifiers by option_id to prevent React key errors if DB has redundant links
+    const uniqueModsMap = new Map();
+    rawModifiers.forEach(m => {
+      if (!uniqueModsMap.has(m.option_id)) {
+        uniqueModsMap.set(m.option_id, m);
+      }
+    });
+    const modifiers = sortModifiersArray(Array.from(uniqueModsMap.values()));
     setProductModifiersByProductId((prev) => ({ ...prev, [productId]: modifiers }));
     return modifiers;
   };
@@ -64,9 +94,24 @@ const Cashier = ({ showNav = false }) => {
   const addItem = async (product) => {
     try {
       const modifiers = await ensureProductModifiers(product.product_id);
-      const defaults = modifiers
-        .filter((modifier) => modifier.is_default)
-        .map((modifier) => ({ ...modifier, qty: 1 }));
+      const defaults = [];
+      const categories = sortModifierCategories(modifiers);
+
+      categories.forEach((category) => {
+        const catMods = modifiers.filter((modifier) => modifier.category === category);
+        if (catMods.length === 0) return;
+        if (category === "Topping") {
+          catMods
+            .filter((modifier) => isDefaultModifier(modifier))
+            .forEach((modifier) => defaults.push({ ...modifier, qty: 1 }));
+          return;
+        }
+        const selectedMod = catMods.find((modifier) => isDefaultModifier(modifier));
+        if (selectedMod) {
+          defaults.push({ ...selectedMod, qty: 1 });
+        }
+      });
+
       const instance_id = Date.now() + Math.random();
       const newItem = { ...product, qty: 1, instance_id, modifiers: defaults };
       setOrder((prev) => [...prev, newItem]);
@@ -120,7 +165,9 @@ const Cashier = ({ showNav = false }) => {
         const isTopping = modifier.category === "Topping";
         let newModifiers = [...(entry.modifiers || [])];
         if (isTopping) {
-          const existingIndex = newModifiers.findIndex((m) => m.option_id === modifier.option_id);
+          const existingIndex = newModifiers.findIndex(
+            (m) => normalizeOptionId(m.option_id) === normalizeOptionId(modifier.option_id)
+          );
           if (existingIndex >= 0) {
             newModifiers.splice(existingIndex, 1);
           } else {
@@ -140,7 +187,9 @@ const Cashier = ({ showNav = false }) => {
     setOrder((prev) =>
       prev.map((entry) => {
         if (entry.instance_id !== currItem.instance_id) return entry;
-        const idx = (entry.modifiers || []).findIndex((m) => m.option_id === optionId);
+        const idx = (entry.modifiers || []).findIndex(
+          (m) => normalizeOptionId(m.option_id) === normalizeOptionId(optionId)
+        );
         if (idx < 0) return entry;
         const updated = [...entry.modifiers];
         updated[idx] = { ...updated[idx], qty: (updated[idx].qty || 1) + delta };
@@ -417,25 +466,30 @@ const Cashier = ({ showNav = false }) => {
   );
 
   if (customizing && currItem) {
+    const availableModifiers = getProductModifiers(currItem.product_id);
+    const modifierCategories = sortModifierCategories(availableModifiers);
     return (
       <div className="cashier-layout">
         <div className="cashier-menu">
           <h2 className="cashier-heading">Customize {currItem.name}</h2>
-          {["Topping", "Ice Level", "Sugar Level", "Size", "Milk Type"].map((category) => (
-            <div key={category} style={{ marginBottom: "12px" }}>
-              <h4 style={{ marginBottom: "6px" }}>{category}</h4>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                {getProductModifiers(currItem.product_id)
-                  .filter((modifier) => modifier.category === category)
-                  .map((modifier) => {
-                    const selected = order
-                      .find((item) => item.instance_id === currItem.instance_id)
-                      ?.modifiers?.find((entry) => entry.option_id === modifier.option_id);
+          {modifierCategories.map((category) => {
+            const catMods = availableModifiers.filter((m) => m.category === category);
+            if (catMods.length === 0) return null;
+
+            return (
+              <div key={category} style={{ marginBottom: "12px" }}>
+                <h4 style={{ marginBottom: "6px" }}>{category}</h4>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                  {catMods.map((modifier) => {
+                    const itemInOrder = order.find((item) => item.instance_id === currItem.instance_id) || currItem;
+                    const selected = itemInOrder?.modifiers?.find(
+                      (entry) => normalizeOptionId(entry.option_id) === normalizeOptionId(modifier.option_id)
+                    );
                     return (
                       <button
                         key={modifier.option_id}
-                        className="cashier-category-btn"
-                        style={{ borderColor: selected ? "#333" : undefined }}
+                        className={`cashier-category-btn${selected ? " selected" : ""}`}
+                        style={selected ? { backgroundColor: "#111827", color: "#fff", borderColor: "#111827" } : undefined}
                         onClick={() => toggleModifier(modifier)}
                       >
                         {modifier.name}
@@ -445,9 +499,10 @@ const Cashier = ({ showNav = false }) => {
                       </button>
                     );
                   })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <button className="cashier-submit-btn" onClick={closeCustomization}>
             Done
           </button>

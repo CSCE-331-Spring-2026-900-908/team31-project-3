@@ -29,10 +29,16 @@ const sortModifiersArray = (modifiers) => {
   });
 };
 
+const isDefaultModifier = (modifier) => {
+  const value = modifier?.is_default;
+  if (value === true || value === 1 || value === "1" || value === "t") return true;
+  return String(value || "").toLowerCase() === "true";
+};
+
 const OrdersPage = ({ cashierMode = false }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [modifiers, setModifiers] = useState([]);
+  const [productModifiersByProductId, setProductModifiersByProductId] = useState({});
   const [order, setOrder] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const instanceCounter = useRef(0);
@@ -53,15 +59,28 @@ const OrdersPage = ({ cashierMode = false }) => {
       .then((r) => r.json())
       .then((data) => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error);
-
-    fetch(`${API_BASE_URL}/productmodifier`)
-      .then((r) => r.json())
-      .then((data) => {
-        const mods = Array.isArray(data) ? data : [];
-        setModifiers(sortModifiersArray(mods));
-      })
-      .catch(console.error);
   }, []);
+
+  const getProductModifiers = (productId) => productModifiersByProductId[productId] || [];
+
+  const ensureProductModifiers = async (productId) => {
+    if (productModifiersByProductId[productId]) return productModifiersByProductId[productId];
+    const response = await fetch(`${API_BASE_URL}/product/${productId}/modifiers`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to load modifiers.");
+    }
+    const rawModifiers = Array.isArray(data) ? data : [];
+    const uniqueModsMap = new Map();
+    rawModifiers.forEach((modifier) => {
+      if (!uniqueModsMap.has(modifier.option_id)) {
+        uniqueModsMap.set(modifier.option_id, modifier);
+      }
+    });
+    const modifiers = sortModifiersArray(Array.from(uniqueModsMap.values()));
+    setProductModifiersByProductId((prev) => ({ ...prev, [productId]: modifiers }));
+    return modifiers;
+  };
 
   const grouped = useMemo(() => {
     const map = new Map();
@@ -75,25 +94,52 @@ const OrdersPage = ({ cashierMode = false }) => {
     return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
   }, [products]);
 
+  const customizingItem = order.find((i) => i.instance_id === customizingId) ?? null;
+  const customizingModifiers = customizingItem ? getProductModifiers(customizingItem.product_id) : [];
+
   const modifiersByCategory = useMemo(() => {
     const map = new Map();
-    for (const m of modifiers) {
+    for (const m of customizingModifiers) {
       const cat = m.category || "Other";
       if (!map.has(cat)) map.set(cat, []);
       map.get(cat).push(m);
     }
     return map;
-  }, [modifiers]);
+  }, [customizingModifiers]);
 
-  const addItem = (product) => {
-    const newItem = {
-      ...product,
-      qty: 1,
-      instance_id: instanceCounter.current++,
-      selectedModifiers: {},
-    };
-    setOrder((prev) => [...prev, newItem]);
-    setCustomizingId(newItem.instance_id);
+  const addItem = async (product) => {
+    try {
+      const modifiers = await ensureProductModifiers(product.product_id);
+      const selectedModifiers = {};
+      const categories = [...new Set(modifiers.map((modifier) => modifier.category).filter(Boolean))];
+      categories.forEach((category) => {
+        const catMods = modifiers.filter((modifier) => modifier.category === category);
+        if (catMods.length === 0) return;
+        if (category === "Topping") {
+          catMods.forEach((modifier) => {
+            if (isDefaultModifier(modifier)) {
+              selectedModifiers[String(modifier.option_id)] = 1;
+            }
+          });
+          return;
+        }
+        const defaultMod = catMods.find((modifier) => isDefaultModifier(modifier));
+        if (defaultMod) {
+          selectedModifiers[String(defaultMod.option_id)] = 1;
+        }
+      });
+
+      const newItem = {
+        ...product,
+        qty: 1,
+        instance_id: instanceCounter.current++,
+        selectedModifiers,
+      };
+      setOrder((prev) => [...prev, newItem]);
+      setCustomizingId(newItem.instance_id);
+    } catch (err) {
+      alert(err.message || "Could not load customization options.");
+    }
   };
 
   const removeItem = (instance_id) => {
@@ -117,6 +163,7 @@ const OrdersPage = ({ cashierMode = false }) => {
         if (item.instance_id !== customizingId) return item;
         const selected = { ...item.selectedModifiers };
         const id = String(modifier.option_id);
+        const itemModifiers = getProductModifiers(item.product_id);
 
         if (modifier.category === "Topping") {
           if (selected[id]) delete selected[id];
@@ -124,7 +171,7 @@ const OrdersPage = ({ cashierMode = false }) => {
         } else {
           const existing = Object.keys(selected).find(
             (k) =>
-              modifiers.find((m) => String(m.option_id) === k)?.category ===
+              itemModifiers.find((m) => String(m.option_id) === k)?.category ===
               modifier.category
           );
           if (existing) delete selected[existing];
@@ -152,8 +199,9 @@ const OrdersPage = ({ cashierMode = false }) => {
 
   const modifierCostForItem = (item) => {
     let cost = 0;
+    const itemModifiers = getProductModifiers(item.product_id);
     for (const [idStr, qty] of Object.entries(item.selectedModifiers || {})) {
-      const mod = modifiers.find((m) => String(m.option_id) === idStr);
+      const mod = itemModifiers.find((m) => String(m.option_id) === idStr);
       if (mod?.price_adjustment) cost += Number(mod.price_adjustment) * qty;
     }
     return cost;
@@ -265,15 +313,22 @@ const OrdersPage = ({ cashierMode = false }) => {
     navigate(`/manager?${new URLSearchParams({ tab: t }).toString()}`);
   };
 
-  const customizingItem = order.find((i) => i.instance_id === customizingId) ?? null;
-
   const modNamesForItem = (item) =>
     Object.entries(item.selectedModifiers || {})
       .map(([id, qty]) => {
-        const m = modifiers.find((mod) => String(mod.option_id) === id);
+        const m = getProductModifiers(item.product_id).find((mod) => String(mod.option_id) === id);
         return m ? (qty > 1 ? `${m.name} ×${qty}` : m.name) : null;
       })
       .filter(Boolean);
+
+  const openCustomization = async (item) => {
+    try {
+      await ensureProductModifiers(item.product_id);
+      setCustomizingId(item.instance_id);
+    } catch (err) {
+      alert(err.message || "Could not load customization options.");
+    }
+  };
 
   return (
     <div className="orders-page">
@@ -376,7 +431,7 @@ const OrdersPage = ({ cashierMode = false }) => {
                     </span>
                     <button
                       className="orders-customize-btn"
-                      onClick={() => setCustomizingId(item.instance_id)}
+                      onClick={() => openCustomization(item)}
                     >
                       Edit
                     </button>
