@@ -123,24 +123,21 @@ body {
   margin-top: 0;
 }
 
-.menu-column table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.menu-column tbody {
+.menu-items {
   display: flex;
   flex-direction: column;
+  gap: 0.3vh;
   width: 100%;
 }
 
-.menu-column tr {
+.menu-item-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   padding: 0.5vh 0;
   border-bottom: 1px dashed #eee;
 }
-.menu-column tr:last-child {
+.menu-item-row:last-child {
   border-bottom: none;
 }
 

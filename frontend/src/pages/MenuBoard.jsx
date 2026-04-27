@@ -12,6 +12,7 @@ const TAG_ICON_MAP = {
 };
 
 const LEGEND_ORDER = ["Vegan", "Dairy", "Nuts", "Gluten", "Egg", "Soy"];
+const HIDDEN_CATEGORY_NAMES = new Set(["hot drinks"]);
 
 const MenuBoard = () => {
   const [products, setProducts] = useState([]);
@@ -38,7 +39,10 @@ const MenuBoard = () => {
     const deduped = new Map();
 
     categoryProducts.forEach((product) => {
-      const key = `${String(product.name || "").trim().toLowerCase()}|${Number(product.base_price).toFixed(2)}|${(product.categories || []).sort().join(",")}`;
+      const normalizedCategories = Array.isArray(product.categories)
+        ? [...product.categories].filter(Boolean).sort()
+        : [];
+      const key = `${String(product.name || "").trim().toLowerCase()}|${Number(product.base_price || 0).toFixed(2)}|${normalizedCategories.join(",")}`;
       const existing = deduped.get(key);
 
       if (!existing) {
@@ -58,6 +62,17 @@ const MenuBoard = () => {
     });
 
     return Array.from(deduped.values());
+  };
+
+  const dedupeById = (items, idKey) => {
+    const map = new Map();
+    items.forEach((item) => {
+      const key = item?.[idKey] ?? item?.name;
+      if (key !== undefined && !map.has(key)) {
+        map.set(key, item);
+      }
+    });
+    return Array.from(map.values());
   };
 
   const fetchData = () => {
@@ -92,13 +107,23 @@ const MenuBoard = () => {
     };
   }, []);
 
-  // Dynamically extract categories from products
-  const categories = [...new Set(products.flatMap((p) => p.categories || []))].filter(Boolean).sort();
-  const allDedupedProducts = dedupeProducts(products);
-
-  const toppingItems = productModifiers.filter((modifier) =>
-    String(modifier.category || "").toLowerCase().includes("topping")
+  const activeProducts = products.filter((product) => product?.is_active !== false);
+  const categories = [...new Set(activeProducts.flatMap((p) => p.categories || []))]
+    .filter((category) => {
+      if (!category) return false;
+      return !HIDDEN_CATEGORY_NAMES.has(String(category).trim().toLowerCase());
+    })
+    .sort();
+  const allDedupedProducts = dedupeProducts(activeProducts).sort((a, b) =>
+    String(a.name || "").localeCompare(String(b.name || ""))
   );
+
+  const toppingItems = dedupeById(
+    productModifiers.filter((modifier) =>
+    String(modifier.category || "").toLowerCase().includes("topping")
+    ),
+    "option_id"
+  ).sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
 
   const menuSections = categories.map((category) => {
     const dedupedCategoryProducts = allDedupedProducts.filter((p) => p.categories?.includes(category));
@@ -152,60 +177,56 @@ const MenuBoard = () => {
         {displaySections.map((section) => (
           <div key={section.key} className="menu-column">
             <h2>{section.title}</h2>
-            <table>
-              <tbody>
-                {section.items.map((product) => (
-                  <tr key={`${product.product_id || product.name}-${Number(product.base_price).toFixed(2)}`}>
-                    <td className="label">
-                      <span className="item-name">{product.name}</span>
-                      <span className="inline-indicators">
-                        {getIndicatorItems(product).map((item) => (
-                          <span
-                            key={`${product.product_id || product.name}-indicator-${item.tag}`}
-                            className="inline-emoji"
-                            title={item.label}
-                            aria-label={item.label}
-                          >
-                            {item.icon}
-                          </span>
-                        ))}
-                      </span>
-                    </td>
-                    <td className="price">${product.base_price.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="menu-items">
+              {section.items.map((product) => (
+                <div key={`${product.product_id || product.name}-${Number(product.base_price || 0).toFixed(2)}`} className="menu-item-row">
+                  <div className="label">
+                    <span className="item-name">{product.name}</span>
+                    <span className="inline-indicators">
+                      {getIndicatorItems(product).map((item) => (
+                        <span
+                          key={`${product.product_id || product.name}-indicator-${item.tag}`}
+                          className="inline-emoji"
+                          title={item.label}
+                          aria-label={item.label}
+                        >
+                          {item.icon}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <div className="price">${Number(product.base_price || 0).toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
 
         {toppingSections.map((section) => (
           <div key={section.key} className="menu-column toppings-column">
             <h2>{section.title}</h2>
-            <table>
-              <tbody>
-                {section.items.map((topping, idx) => (
-                  <tr key={topping.option_id || topping.id || topping.name || idx}>
-                    <td className="label">
-                      <span className="item-name">{topping.name}</span>
-                      <span className="inline-indicators">
-                        {getIndicatorItems(topping).map((item) => (
-                          <span
-                            key={`${topping.option_id || topping.name}-indicator-${item.tag}`}
-                            className="inline-emoji"
-                            title={item.label}
-                            aria-label={item.label}
-                          >
-                            {item.icon}
-                          </span>
-                        ))}
-                      </span>
-                    </td>
-                    <td className="price">${topping.price_adjustment.toFixed(2)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="menu-items">
+              {section.items.map((topping, idx) => (
+                <div key={topping.option_id || topping.id || topping.name || idx} className="menu-item-row">
+                  <div className="label">
+                    <span className="item-name">{topping.name}</span>
+                    <span className="inline-indicators">
+                      {getIndicatorItems(topping).map((item) => (
+                        <span
+                          key={`${topping.option_id || topping.name}-indicator-${item.tag}`}
+                          className="inline-emoji"
+                          title={item.label}
+                          aria-label={item.label}
+                        >
+                          {item.icon}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <div className="price">${Number(topping.price_adjustment || 0).toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
