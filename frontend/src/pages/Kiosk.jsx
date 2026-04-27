@@ -32,6 +32,7 @@ const Kiosk = ({ showNav = false }) => {
   const [linkedCustomer, setLinkedCustomer] = useState(null);
   const [redeemVoucher, setRedeemVoucher] = useState(false);
   const [lookupMessage, setLookupMessage] = useState("");
+  const [showCreateRewards, setShowCreateRewards] = useState(false);
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeUI, setLargeUI] = useState(false);
@@ -220,10 +221,12 @@ const Kiosk = ({ showNav = false }) => {
         setLookupMessage(t("Customer not found."));
         setLinkedCustomer(null);
         setRedeemVoucher(false);
+        setShowCreateRewards(true);
         return;
       }
       const data = await res.json();
       setLinkedCustomer(data);
+      setShowCreateRewards(false);
       if (data.points >= 65) {
         setRedeemVoucher(true);
         setLookupMessage(
@@ -237,6 +240,37 @@ const Kiosk = ({ showNav = false }) => {
       }
     } catch (err) {
       setLookupMessage(t("Error looking up account."));
+      setShowCreateRewards(false);
+    }
+  };
+
+  const handleCreateRewardsAccount = async () => {
+    const normalizedEmail = rewardsEmail.trim();
+    if (!normalizedEmail) {
+      setLookupMessage(t("Enter an email first."));
+      return;
+    }
+
+    const suggestedName = normalizedEmail.split("@")[0] || "Rewards Customer";
+    const enteredName = window.prompt(t("Enter customer name:"), suggestedName);
+    if (enteredName === null) return;
+
+    try {
+      const res = await fetch(`${API}/customers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, name: enteredName.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || t("Failed to create rewards account."));
+      }
+      setLinkedCustomer(data);
+      setRedeemVoucher(false);
+      setLookupMessage(t("Rewards account created and linked!"));
+      setShowCreateRewards(false);
+    } catch (err) {
+      setLookupMessage(err.message || t("Failed to create rewards account."));
     }
   };
 
@@ -732,6 +766,15 @@ const Kiosk = ({ showNav = false }) => {
                   >
                     {t("Look Up")}
                   </button>
+                  {showCreateRewards ? (
+                    <button
+                      onClick={handleCreateRewardsAccount}
+                      className="kiosk-apply-rewards-btn"
+                      style={{ width: "100%", marginTop: "8px", background: "#16a34a" }}
+                    >
+                      {t("Create Rewards Account")}
+                    </button>
+                  ) : null}
                   {lookupMessage && (
                     <div
                       style={{
