@@ -25,6 +25,7 @@ const OrdersPage = ({ cashierMode = false }) => {
   const [redeemVoucher, setRedeemVoucher] = useState(false);
   const [lookupMessage, setLookupMessage] = useState("");
   const [isRewardsExpanded, setIsRewardsExpanded] = useState(false);
+  const [showCreateRewards, setShowCreateRewards] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/product`)
@@ -145,13 +146,46 @@ const OrdersPage = ({ cashierMode = false }) => {
         setLookupMessage("Customer not found.");
         setLinkedCustomer(null);
         setRedeemVoucher(false);
+        setShowCreateRewards(true);
         return;
       }
       const data = await res.json();
       setLinkedCustomer(data);
       setLookupMessage("Account linked!");
+      setShowCreateRewards(false);
     } catch {
       setLookupMessage("Error looking up account.");
+      setShowCreateRewards(false);
+    }
+  };
+
+  const handleCreateRewardsAccount = async () => {
+    const normalizedEmail = customerEmail.trim();
+    if (!normalizedEmail) {
+      setLookupMessage("Enter an email first.");
+      return;
+    }
+
+    const suggestedName = normalizedEmail.split("@")[0] || "Rewards Customer";
+    const enteredName = window.prompt("Enter customer name:", suggestedName);
+    if (enteredName === null) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/customers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, name: enteredName.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create rewards account.");
+      }
+      setLinkedCustomer(data);
+      setRedeemVoucher(false);
+      setLookupMessage("Rewards account created and linked!");
+      setShowCreateRewards(false);
+    } catch (err) {
+      setLookupMessage(err.message || "Failed to create rewards account.");
     }
   };
 
@@ -373,6 +407,15 @@ const OrdersPage = ({ cashierMode = false }) => {
                       Cancel
                     </button>
                   </div>
+                  {showCreateRewards ? (
+                    <button
+                      onClick={handleCreateRewardsAccount}
+                      className="orders-rewards-btn"
+                      style={{ background: "#16a34a", marginTop: "8px" }}
+                    >
+                      Create Rewards Account
+                    </button>
+                  ) : null}
                   {lookupMessage && (
                     <p className="orders-rewards-msg">{lookupMessage}</p>
                   )}

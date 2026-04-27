@@ -17,7 +17,8 @@ const categories = [
   "Brewed Tea Series",
   "Coffee Series",
   "Slush Series",
-  "Seasonal Series"
+  "Seasonal Series",
+  "Hot Drinks"
 ];
 
 const Kiosk = ({ showNav = false }) => {
@@ -32,10 +33,12 @@ const Kiosk = ({ showNav = false }) => {
   const [linkedCustomer, setLinkedCustomer] = useState(null);
   const [redeemVoucher, setRedeemVoucher] = useState(false);
   const [lookupMessage, setLookupMessage] = useState("");
+  const [showCreateRewards, setShowCreateRewards] = useState(false);
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeUI, setLargeUI] = useState(false);
   const [checkoutNotice, setCheckoutNotice] = useState(null);
+  const [hotDrinksExpanded, setHotDrinksExpanded] = useState(false);
 
   const { language, changeLanguage, t, translateDynamic } = useTranslation();
 
@@ -96,12 +99,28 @@ const Kiosk = ({ showNav = false }) => {
 
   const createOrderNumber = () => Math.floor(100 + Math.random() * 900);
 
-  const addItem = async (product) => {
+  const addItem = async (product, options = {}) => {
     try {
       const productModifiers = await ensureProductModifiers(product.product_id);
-      const defaults = productModifiers
+      let defaults = productModifiers
         .filter((m) => m.is_default)
         .map((m) => ({ ...m, qty: 1 }));
+
+      // Hot Drinks section should start with "No Ice" when available.
+      if (options.fromHotDrinksSection) {
+        const noIceOption = productModifiers.find(
+          (m) =>
+            String(m.category || "").toLowerCase() === "ice level" &&
+            /no\s*ice/i.test(String(m.name || ""))
+        );
+        if (noIceOption) {
+          defaults = defaults.filter(
+            (m) => String(m.category || "").toLowerCase() !== "ice level"
+          );
+          defaults.push({ ...noIceOption, qty: 1 });
+        }
+      }
+
       const instance_id = Date.now() + Math.random();
       const newItem = { ...product, modifiers: defaults, qty: 1, instance_id };
       setOrder((prev) => [...prev, newItem]);
@@ -203,10 +222,12 @@ const Kiosk = ({ showNav = false }) => {
         setLookupMessage(t("Customer not found."));
         setLinkedCustomer(null);
         setRedeemVoucher(false);
+        setShowCreateRewards(true);
         return;
       }
       const data = await res.json();
       setLinkedCustomer(data);
+      setShowCreateRewards(false);
       if (data.points >= 65) {
         setRedeemVoucher(true);
         setLookupMessage(
@@ -220,6 +241,37 @@ const Kiosk = ({ showNav = false }) => {
       }
     } catch (err) {
       setLookupMessage(t("Error looking up account."));
+      setShowCreateRewards(false);
+    }
+  };
+
+  const handleCreateRewardsAccount = async () => {
+    const normalizedEmail = rewardsEmail.trim();
+    if (!normalizedEmail) {
+      setLookupMessage(t("Enter an email first."));
+      return;
+    }
+
+    const suggestedName = normalizedEmail.split("@")[0] || "Rewards Customer";
+    const enteredName = window.prompt(t("Enter customer name:"), suggestedName);
+    if (enteredName === null) return;
+
+    try {
+      const res = await fetch(`${API}/customers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, name: enteredName.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || t("Failed to create rewards account."));
+      }
+      setLinkedCustomer(data);
+      setRedeemVoucher(false);
+      setLookupMessage(t("Rewards account created and linked!"));
+      setShowCreateRewards(false);
+    } catch (err) {
+      setLookupMessage(err.message || t("Failed to create rewards account."));
     }
   };
 
@@ -616,8 +668,16 @@ const Kiosk = ({ showNav = false }) => {
             )}
 
             {categories.map((category) => {
-              const catProducts = products.filter((p) => p.category_name === category);
+              const catProducts =
+                category === "Hot Drinks"
+                  ? products.filter((p) => p.can_be_served_hot === true)
+                  : products.filter((p) => p.category_name === category);
               if (catProducts.length === 0) return null;
+              const isHotDrinksCategory = category === "Hot Drinks";
+              const visibleProducts =
+                isHotDrinksCategory && !hotDrinksExpanded
+                  ? catProducts.slice(0, 7)
+                  : catProducts;
               return (
                 <div
                   key={category}
@@ -626,11 +686,13 @@ const Kiosk = ({ showNav = false }) => {
                 >
                   <h2 className="kiosk-heading">{t(category)}</h2>
                   <div className="kiosk-product-grid">
-                    {catProducts.map((p) => (
+                    {visibleProducts.map((p) => (
                       <button
                         key={p.product_id}
                         className={`kiosk-product-btn ${p.is_available === false ? "unavailable" : ""}`}
-                        onClick={() => addItem(p)}
+                        onClick={() =>
+                          addItem(p, { fromHotDrinksSection: category === "Hot Drinks" })
+                        }
                         disabled={p.is_available === false}
                         title={p.is_available === false ? "Out of stock ingredients" : ""}
                       >
@@ -652,6 +714,17 @@ const Kiosk = ({ showNav = false }) => {
                       </button>
                     ))}
                   </div>
+                  {isHotDrinksCategory && catProducts.length > 7 ? (
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
+                      <button
+                        type="button"
+                        className="kiosk-category-btn"
+                        onClick={() => setHotDrinksExpanded((prev) => !prev)}
+                      >
+                        {hotDrinksExpanded ? t("Show Less") : t("View More")}
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -694,6 +767,15 @@ const Kiosk = ({ showNav = false }) => {
                   >
                     {t("Look Up")}
                   </button>
+                  {showCreateRewards ? (
+                    <button
+                      onClick={handleCreateRewardsAccount}
+                      className="kiosk-apply-rewards-btn"
+                      style={{ width: "100%", marginTop: "8px", background: "#16a34a" }}
+                    >
+                      {t("Create Rewards Account")}
+                    </button>
+                  ) : null}
                   {lookupMessage && (
                     <div
                       style={{

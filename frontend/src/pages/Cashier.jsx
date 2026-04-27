@@ -17,6 +17,7 @@ const Cashier = ({ showNav = false }) => {
   const [linkedCustomer, setLinkedCustomer] = useState(null);
   const [redeemVoucher, setRedeemVoucher] = useState(false);
   const [lookupMessage, setLookupMessage] = useState("");
+  const [showCreateRewards, setShowCreateRewards] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/product`)
@@ -137,13 +138,46 @@ const Cashier = ({ showNav = false }) => {
         setLookupMessage("Customer not found.");
         setLinkedCustomer(null);
         setRedeemVoucher(false);
+        setShowCreateRewards(true);
         return;
       }
       const data = await res.json();
       setLinkedCustomer(data);
       setLookupMessage("Account linked!");
+      setShowCreateRewards(false);
     } catch (err) {
       setLookupMessage("Error looking up account.");
+      setShowCreateRewards(false);
+    }
+  };
+
+  const handleCreateRewardsAccount = async () => {
+    const normalizedEmail = customerEmail.trim();
+    if (!normalizedEmail) {
+      setLookupMessage("Enter an email first.");
+      return;
+    }
+
+    const suggestedName = normalizedEmail.split("@")[0] || "Rewards Customer";
+    const enteredName = window.prompt("Enter customer name:", suggestedName);
+    if (enteredName === null) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/customers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail, name: enteredName.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create rewards account.");
+      }
+      setLinkedCustomer(data);
+      setRedeemVoucher(false);
+      setLookupMessage("Rewards account created and linked!");
+      setShowCreateRewards(false);
+    } catch (err) {
+      setLookupMessage(err.message || "Failed to create rewards account.");
     }
   };
 
@@ -260,6 +294,14 @@ const Cashier = ({ showNav = false }) => {
               style={{ padding: '5px', width: '100%', marginBottom: '5px' }}
             />
             <button onClick={handleLookup} style={{ width: '100%', padding: '5px', background: '#333', color: 'white', borderRadius: '4px' }}>Lookup</button>
+            {showCreateRewards ? (
+              <button
+                onClick={handleCreateRewardsAccount}
+                style={{ width: "100%", padding: "5px", background: "#16a34a", color: "white", borderRadius: "4px", marginTop: "6px" }}
+              >
+                Create Rewards Account
+              </button>
+            ) : null}
             {lookupMessage && <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>{lookupMessage}</p>}
           </div>
         ) : (
