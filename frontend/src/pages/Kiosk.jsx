@@ -226,8 +226,9 @@ const Kiosk = ({ showNav = false }) => {
     if (order.length === 0) return;
     try {
       const orderNumber = createOrderNumber();
+      const showPoints = Boolean(linkedCustomer);
       const pointsEarned = Math.max(0, Math.floor(subtotal - discount));
-      const rewardsTarget = linkedCustomer?.name ? `${linkedCustomer.name}'s` : t("your");
+      const rewardsTarget = linkedCustomer?.name ? `${linkedCustomer.name}'s` : "";
       const payload = {
         employeeId: 1,
         customerId: linkedCustomer?.id || null,
@@ -252,6 +253,7 @@ const Kiosk = ({ showNav = false }) => {
         orderNumber,
         pointsEarned,
         rewardsTarget,
+        showPoints,
       });
       setOrder([]);
       setLinkedCustomer(null);
@@ -845,9 +847,13 @@ const Kiosk = ({ showNav = false }) => {
                 <div className="kiosk-checkout-confirmation" role="status" aria-live="polite">
                   <div className="kiosk-checkout-title">{t("Checkout complete!")}</div>
                   <div className="kiosk-checkout-body">
-                    {t("Order")} #{checkoutNotice.orderNumber}. {t("You earned")}{" "}
-                    {checkoutNotice.pointsEarned} {t("pts")} {t("to")}{" "}
-                    {checkoutNotice.rewardsTarget} {t("rewards account")}.
+                    {t("Order")} #{checkoutNotice.orderNumber}.
+                    {checkoutNotice.showPoints && (
+                      <>
+                        {" "}{t("You earned")} {checkoutNotice.pointsEarned} {t("pts")} {t("to")}{" "}
+                        {checkoutNotice.rewardsTarget} {t("rewards account")}.
+                      </>
+                    )}
                   </div>
                 </div>
               )}
