@@ -463,13 +463,15 @@ const Kiosk = ({ showNav = false }) => {
           </div>
           <div className="kiosk-display-layout">
             <div className="kiosk-menu" aria-label="Customization options">
-              {modifierCategories.map(({ key, label }) => (
-                <div key={key} className="kiosk-modifier-group" aria-label={label}>
-                  <h2 className="kiosk-heading">{label}</h2>
-                  <div className="kiosk-product-grid modifiers">
-                    {getProductModifiers(currItem.product_id)
-                      .filter((m) => m.category === key)
-                      .map((m) => {
+              {modifierCategories.map(({ key, label }) => {
+                const categoryModifiers = getProductModifiers(currItem.product_id)
+                  .filter((m) => m.category === key);
+                if (categoryModifiers.length === 0) return null;
+                return (
+                  <div key={key} className="kiosk-modifier-group" aria-label={label}>
+                    <h2 className="kiosk-heading">{label}</h2>
+                    <div className="kiosk-product-grid modifiers">
+                      {categoryModifiers.map((m) => {
                         const activeItem = order.find(
                           (item) => item.instance_id === currItem.instance_id
                         );
@@ -562,9 +564,10 @@ const Kiosk = ({ showNav = false }) => {
                           </div>
                         );
                       })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="kiosk-sidebar customize-sidebar">
