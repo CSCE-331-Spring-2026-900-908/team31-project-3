@@ -107,6 +107,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.orders-product-btn.unavailable,
+.orders-product-btn:disabled {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .orders-product-img-placeholder {
   width: 115px;
   height: 115px;

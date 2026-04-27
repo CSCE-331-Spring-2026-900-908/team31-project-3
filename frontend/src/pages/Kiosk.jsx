@@ -585,13 +585,16 @@ const Kiosk = ({ showNav = false }) => {
                   {recommendedProducts.map((p) => (
                     <button
                       key={`rec-${p.product_id}`}
-                      className="kiosk-product-btn"
+                      className={`kiosk-product-btn ${p.is_available === false ? "unavailable" : ""}`}
                       onClick={() => addItem(p)}
+                      disabled={p.is_available === false}
+                      title={p.is_available === false ? "Out of stock ingredients" : ""}
                     >
                       {t(p.name)}
                       <img src={p.image_url} alt={p.name} className="kiosk-product-image" />
                       {p.diet === "Vegan" && <img className="dietImg" src={vegan_icon} alt="Vegan" />}
                       {p.diet === "Dairy" && <img className="dietImg" src={dairy_icon} alt="Dairy" />}
+                      {p.is_available === false ? ` (${t("Out of stock")})` : ""}
                     </button>
                   ))}
                 </div>
@@ -612,10 +615,13 @@ const Kiosk = ({ showNav = false }) => {
                     {catProducts.map((p) => (
                       <button
                         key={p.product_id}
-                        className="kiosk-product-btn"
+                        className={`kiosk-product-btn ${p.is_available === false ? "unavailable" : ""}`}
                         onClick={() => addItem(p)}
+                        disabled={p.is_available === false}
+                        title={p.is_available === false ? "Out of stock ingredients" : ""}
                       >
                         {t(p.name)}
+                        {p.is_available === false ? ` (${t("Out of stock")})` : ""}
                         <img
                           src={getProxiedImageUrl(p.image_url)}
                           alt={p.name}

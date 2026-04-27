@@ -48,6 +48,18 @@ async function fetchAllowedModifiers(client, productId, modifierIds) {
   return result.rows;
 }
 
+async function getInsufficientIngredients(client, productId, qty = 1) {
+  const result = await client.query(
+    "SELECT i.item_name, i.quantity, pi.quantity_used " +
+      "FROM productingredient pi " +
+      "JOIN inventory i ON i.item_id = pi.item_id " +
+      "WHERE pi.product_id = $1 AND i.quantity < (pi.quantity_used * $2) " +
+      "ORDER BY i.item_name;",
+    [productId, qty]
+  );
+  return result.rows;
+}
+
 router.post("/", async (req, res) => {
   const { employeeId, customerId } = req.body || {};
   const authCustomerId = req.user?.id || customerId || null;
@@ -144,6 +156,15 @@ router.post("/:orderId/items", async (req, res) => {
     }
 
     const product = productResult.rows[0];
+    const insufficientIngredients = await getInsufficientIngredients(client, productId, qty);
+    if (insufficientIngredients.length > 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).json({
+        error: "Insufficient inventory for this drink.",
+        unavailableIngredients: insufficientIngredients.map((row) => row.item_name),
+      });
+    }
+
     const allowedModifiers = await fetchAllowedModifiers(
       client,
       productId,
@@ -425,6 +446,64 @@ router.post("/bulk", async (req, res) => {
       [employeeId || null, authCustomerId]
     );
     const orderId = orderRes.rows[0].id;
+
+    const ingredientRequirements = new Map();
+    const productIngredientCache = new Map();
+    const distinctProductIds = [...new Set(
+      items
+        .map((item) => Number(item?.productId))
+        .filter((id) => Number.isInteger(id))
+    )];
+
+    for (const productId of distinctProductIds) {
+      const ingredientResult = await client.query(
+        "SELECT item_id, quantity_used FROM productingredient WHERE product_id = $1;",
+        [productId]
+      );
+      productIngredientCache.set(productId, ingredientResult.rows);
+    }
+
+    for (const item of items) {
+      const productId = Number(item?.productId);
+      const qty = Math.max(Number(item?.quantity || 1), 1);
+      if (!Number.isInteger(productId)) continue;
+      const ingredients = productIngredientCache.get(productId) || [];
+      for (const ingredient of ingredients) {
+        const itemId = Number(ingredient.item_id);
+        const required = Number(ingredient.quantity_used) * qty;
+        ingredientRequirements.set(itemId, (ingredientRequirements.get(itemId) || 0) + required);
+      }
+    }
+
+    if (ingredientRequirements.size > 0) {
+      const itemIds = [...ingredientRequirements.keys()];
+      const inventoryResult = await client.query(
+        "SELECT item_id, item_name, quantity FROM inventory WHERE item_id = ANY($1::int[]);",
+        [itemIds]
+      );
+      const inventoryById = new Map(
+        inventoryResult.rows.map((row) => [Number(row.item_id), row])
+      );
+
+      const unavailableIngredients = itemIds
+        .map((itemId) => {
+          const inventory = inventoryById.get(itemId);
+          const required = ingredientRequirements.get(itemId) || 0;
+          if (!inventory || Number(inventory.quantity) < required) {
+            return inventory?.item_name || `Ingredient ${itemId}`;
+          }
+          return null;
+        })
+        .filter(Boolean);
+
+      if (unavailableIngredients.length > 0) {
+        await client.query("ROLLBACK");
+        return res.status(409).json({
+          error: "Insufficient inventory for one or more drinks.",
+          unavailableIngredients,
+        });
+      }
+    }
 
     // 2. Insert Items
     for (const item of items) {

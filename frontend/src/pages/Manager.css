@@ -261,10 +261,18 @@
   padding: 16px;
 }
 
+.manager-config-modal {
+  width: min(980px, 100%);
+}
+
 .manager-modal h3 {
   margin: 0 0 10px;
   font-size: 1.1rem;
   color: #111827;
+}
+
+.manager-modal h4 {
+  margin: 0 0 8px;
 }
 
 .manager-modal-form {
@@ -283,6 +291,44 @@
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+}
+
+.manager-config-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.manager-config-scroll {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.manager-config-scroll-modifiers {
+  max-height: 320px;
+}
+
+.manager-config-scroll-ingredients {
+  max-height: 320px;
+}
+
+.manager-config-option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.manager-config-ingredient-row {
+  display: grid;
+  grid-template-columns: auto 1fr 120px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .menu-col-name {
@@ -362,5 +408,9 @@
 
   .manager-actions-group {
     white-space: normal;
+  }
+
+  .manager-config-columns {
+    grid-template-columns: 1fr;
   }
 }

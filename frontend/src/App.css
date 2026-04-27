@@ -220,6 +220,19 @@
   align-items: center;
 }
 
+.filter-group.disabled .chip {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.filter-group.disabled .chip.active {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
 .view-toggle {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
