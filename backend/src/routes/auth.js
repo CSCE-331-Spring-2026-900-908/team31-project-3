@@ -5,18 +5,7 @@ const pool = require("../../server/db");
 
 const router = express.Router();
 
-const managerEmails = new Set(
-  (process.env.MANAGER_EMAILS ||
-    "nitheeshk@tamu.edu,longvo.work84@tamu.edu,abelasteway@tamu.edu,noahhiggins@tamu.edu,sanjitbhimanadham@tamu.edu")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean)
-);
-
-const isManagerEmail = (email) => {
-  if (!email) return false;
-  return managerEmails.has(String(email).trim().toLowerCase());
-};
+const isManagerEmail = () => true;
 
 const toErrorMessage = (err) => {
   if (!err) return "Unknown error";
